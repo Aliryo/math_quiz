@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
 
@@ -14,14 +17,14 @@ class FirebaseHelper {
 
   //? Menambah Hasil Kuis Ke Firebase
   static Future<void> addResult(ResultMdl result) async {
-    final resultsRef = FirebaseFirestore.instance.collection('results');
+    final CollectionReference resultsRef =
+        FirebaseFirestore.instance.collection('results');
 
-    final querySnapshot =
+    final QuerySnapshot querySnapshot =
         await resultsRef.where('name', isEqualTo: result.name).get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      final existingDocId = querySnapshot.docs.first.id;
-
+      final String existingDocId = querySnapshot.docs.first.id;
       await resultsRef.doc(existingDocId).update(result.toMap());
     } else {
       await resultsRef.add(result.toMap());
@@ -42,7 +45,7 @@ class FirebaseHelper {
   static Future<List<QuestionMdl>> fetchAndShuffleQuestions(
     String partName,
   ) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('questions')
         .where('partName', isEqualTo: partName)
         .get();
@@ -59,7 +62,7 @@ class FirebaseHelper {
 
   //? Mengambil Data-Data Modul Dari Firebase
   static Future<List<ModuleMdl>> fetchModules() async {
-    QuerySnapshot snapshot =
+    final QuerySnapshot snapshot =
         await FirebaseFirestore.instance.collection('modules').get();
 
     List<ModuleMdl> modules = snapshot.docs
@@ -72,7 +75,7 @@ class FirebaseHelper {
 
   //? Mengambil Data-Data Materi Dari Firebase
   static Future<List<PartMdl>> fetchParts(String moduleName) async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('parts')
         .where('moduleName', isEqualTo: moduleName)
         .get();
@@ -107,5 +110,20 @@ class FirebaseHelper {
         .collection('parts')
         .doc(documentId)
         .delete();
+  }
+
+  //? Upload Gambar Ke Firebase
+  static Future<String?> uploadImage(File file) async {
+    final String fileName = file.path.split('/').last;
+
+    final Reference storageRef =
+        FirebaseStorage.instance.ref().child('question_images/$fileName');
+
+    final UploadTask uploadTask = storageRef.putFile(file);
+
+    final TaskSnapshot taskSnapshot = await uploadTask;
+    final String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadUrl;
   }
 }

@@ -33,17 +33,6 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 40),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Tambah Pertanyaan',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddQuestionPage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    MySelectionButton(
-                      minWidth: double.infinity,
                       title: 'Tambah Modul',
                       onTap: () => Navigator.push(
                         context,
@@ -62,7 +51,18 @@ class _SettingPageState extends State<SettingPage> {
                           builder: (_) => const AddPartPage(),
                         ),
                       ),
-                    )
+                    ),
+                    const SizedBox(height: 12),
+                    MySelectionButton(
+                      minWidth: double.infinity,
+                      title: 'Tambah Pertanyaan',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddQuestionPage(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

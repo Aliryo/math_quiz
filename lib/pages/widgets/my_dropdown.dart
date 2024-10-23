@@ -16,6 +16,10 @@ class MyDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const SizedBox();
+    }
+
     return DropdownButtonFormField<T>(
       decoration: InputDecoration(
         labelText: label,

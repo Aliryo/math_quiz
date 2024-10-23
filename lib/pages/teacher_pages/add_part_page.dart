@@ -24,9 +24,7 @@ class _AddPartPageState extends State<AddPartPage> {
     if (_selectedModuleName == null ||
         _partName == null ||
         _partName!.isEmpty) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(MySnackbar.failed(message: 'Semua form harus diisi.'));
+      MySnackbar.failed(context, message: 'Semua form harus diisi.');
 
       return;
     }
@@ -42,18 +40,13 @@ class _AddPartPageState extends State<AddPartPage> {
       await FirebaseHelper.addPart(part);
 
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-              MySnackbar.success(message: 'Materi berhasil ditambahkan.'));
+        MySnackbar.success(context, message: 'Materi berhasil ditambahkan.');
       }
       setState(() => _isLoading = false);
     } catch (e) {
       //? Jika Terdapat Kegagalan
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(MySnackbar.failed(message: e.toString()));
+        MySnackbar.failed(context, message: e.toString());
       }
       setState(() => _isLoading = false);
     }

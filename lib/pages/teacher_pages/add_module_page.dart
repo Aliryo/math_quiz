@@ -18,9 +18,7 @@ class _AddModulePageState extends State<AddModulePage> {
   Future<void> _submitModule() async {
     //? Validasi Semua Harus Diisi
     if (_moduleName == null || _moduleName!.isEmpty) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(MySnackbar.failed(message: 'Semua form harus diisi.'));
+      MySnackbar.failed(context, message: 'Semua form harus diisi.');
 
       return;
     }
@@ -35,18 +33,13 @@ class _AddModulePageState extends State<AddModulePage> {
       await FirebaseHelper.addModule(module);
 
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-              MySnackbar.success(message: 'Modul berhasil ditambahkan.'));
+        MySnackbar.success(context, message: 'Modul berhasil ditambahkan.');
       }
       setState(() => _isLoading = false);
     } catch (e) {
       //? Jika Terdapat Kegagalan
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(MySnackbar.failed(message: e.toString()));
+        MySnackbar.failed(context, message: e.toString());
       }
       setState(() => _isLoading = false);
     }

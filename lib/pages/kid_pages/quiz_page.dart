@@ -136,6 +136,7 @@ class _QuizPageState extends State<QuizPage> {
       onAnswerSelected: _handleAnswer,
       progressValue: _progressValue,
       remainingTime: _remainingTime,
+      currentQuestionIndex: _currentQuestionIndex,
     );
   }
 }
@@ -146,12 +147,14 @@ class _ViewQuiz extends StatelessWidget {
     required this.onAnswerSelected,
     required this.progressValue,
     required this.remainingTime,
+    required this.currentQuestionIndex,
   });
 
   final QuestionMdl question;
   final ValueChanged<String> onAnswerSelected;
   final double progressValue;
   final int remainingTime;
+  final int currentQuestionIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +169,7 @@ class _ViewQuiz extends StatelessWidget {
               remainingTime: remainingTime,
               question: question,
               onAnswerSelected: onAnswerSelected,
+              currentQuestionIndex: currentQuestionIndex,
             ),
           ],
         ),
@@ -220,26 +224,31 @@ class _ViewForeground extends StatelessWidget {
     required this.remainingTime,
     required this.question,
     required this.onAnswerSelected,
+    required this.currentQuestionIndex,
   });
 
   final double progressValue;
   final int remainingTime;
   final QuestionMdl question;
   final ValueChanged<String> onAnswerSelected;
+  final int currentQuestionIndex;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           children: [
-            const SizedBox(height: 20),
             _WidgetLinearProgress(progressValue: progressValue),
             const SizedBox(height: 20),
-            _WidgetTimer(remainingTime: remainingTime),
-            const SizedBox(height: 60),
+            _WidgetTimer(
+              remainingTime: remainingTime,
+              currentQuestionIndex: currentQuestionIndex,
+            ),
+            const SizedBox(height: 40),
             _WidgetQuestion(question: question),
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
             _WidgetGridAnswer(
               options: question.options,
               onOptionSelected: onAnswerSelected,
@@ -272,14 +281,18 @@ class _WidgetLinearProgress extends StatelessWidget {
 }
 
 class _WidgetTimer extends StatelessWidget {
-  const _WidgetTimer({required this.remainingTime});
+  const _WidgetTimer({
+    required this.remainingTime,
+    required this.currentQuestionIndex,
+  });
 
   final int remainingTime;
+  final int currentQuestionIndex;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           padding: const EdgeInsets.all(10),
@@ -305,6 +318,14 @@ class _WidgetTimer extends StatelessWidget {
             ],
           ),
         ),
+        Text(
+          '${currentQuestionIndex + 1}/10',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.purpleAccent[100],
+          ),
+        ),
       ],
     );
   }
@@ -317,28 +338,25 @@ class _WidgetQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: Image.network(
-          question.imageUrl,
-          fit: BoxFit.fill,
-          height: MediaQuery.of(context).size.width / 2,
-          errorBuilder: (_, __, ___) => Container(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-            alignment: Alignment.center,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              question.questionText,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: Image.network(
+        question.imageUrl,
+        fit: BoxFit.fill,
+        height: MediaQuery.of(context).size.width / 2,
+        errorBuilder: (_, __, ___) => Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+          alignment: Alignment.center,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            question.questionText,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -364,7 +382,6 @@ class _WidgetGridAnswer extends StatelessWidget {
       height: MediaQuery.of(context).size.height / 2,
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(8),
         itemCount: options.length,
         itemBuilder: (context, index) {
           return _WidgetAnswer(
@@ -435,7 +452,7 @@ class _WidgetAnswerState extends State<_WidgetAnswer>
           ),
           color: Colors.deepPurpleAccent[100]?.withOpacity(0.4),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Text(
               '${widget.label}. ${widget.answer}',
               style: const TextStyle(
