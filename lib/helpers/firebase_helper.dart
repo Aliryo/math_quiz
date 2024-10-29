@@ -88,6 +88,34 @@ class FirebaseHelper {
     return parts;
   }
 
+  //? Mengambil Data-Data Hasil Siswa Dari Firebase
+  static Future<List<ResultMdl>> fetchResults(String partName) async {
+    final QuerySnapshot<Map<String, dynamic>> resultsRef =
+        await FirebaseFirestore.instance.collection('results').get();
+
+    final List<ResultMdl> filteredResults = resultsRef.docs
+        .map((doc) => ResultMdl.fromMap(doc.data(), doc.id))
+        .where((result) =>
+            result.scoreData.any((score) => score.partName == partName))
+        .toList();
+
+    filteredResults.sort((a, b) {
+      final aScore = a.scoreData
+          .firstWhere((score) => score.partName == partName,
+              orElse: () => ScoreData(score: 0))
+          .score;
+
+      final bScore = b.scoreData
+          .firstWhere((score) => score.partName == partName,
+              orElse: () => ScoreData(score: 0))
+          .score;
+
+      return bScore.compareTo(aScore);
+    });
+
+    return filteredResults;
+  }
+
   //? Menghapus Satu Pertanyaan
   static Future<void> deleteQuestion(String documentId) async {
     await FirebaseFirestore.instance

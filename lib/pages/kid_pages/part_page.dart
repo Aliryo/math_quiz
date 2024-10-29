@@ -68,15 +68,36 @@ class _PartPageState extends State<PartPage> {
                       child: MySelectionButton(
                         minWidth: double.infinity,
                         title: partName,
-                        onTap: () => Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => QuizPage(
-                              kidName: widget.kidName,
-                              partName: partName,
-                            ),
-                          ),
-                          (_) => false,
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return _OptionDialog(
+                              onTapQuiz: () {
+                                Navigator.of(context).pop();
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => QuizPage(
+                                      kidName: widget.kidName,
+                                      partName: partName,
+                                    ),
+                                  ),
+                                  (_) => false,
+                                );
+                              },
+                              onTapResult: () {
+                                Navigator.of(context).pop();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ResultPage(
+                                      partName: partName,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                     );
@@ -87,6 +108,51 @@ class _PartPageState extends State<PartPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _OptionDialog extends StatelessWidget {
+  const _OptionDialog({
+    required this.onTapQuiz,
+    required this.onTapResult,
+  });
+  final VoidCallback onTapQuiz;
+  final VoidCallback onTapResult;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Apa yang ingin kamu lakukan saat ini?'),
+      content: const Row(
+        children: [
+          Icon(Icons.warning_rounded, color: Colors.red),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Ingat, jika kamu memulai kuis, kamu tidak bisa kembali!',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: onTapResult,
+          child: const Text(
+            'Lihat Hasil',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.deepPurple,
+            ),
+          ),
+        ),
+        MySelectionButton(
+          title: 'Mulai Kuis',
+          onTap: onTapQuiz,
+        ),
+      ],
     );
   }
 }

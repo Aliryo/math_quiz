@@ -160,18 +160,25 @@ class _ViewQuiz extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        body: Stack(
-          children: [
-            const _ViewBackground(),
-            _ViewForeground(
-              progressValue: progressValue,
-              remainingTime: remainingTime,
-              question: question,
-              onAnswerSelected: onAnswerSelected,
-              currentQuestionIndex: currentQuestionIndex,
-            ),
-          ],
+      child: PopScope(
+        canPop: false,
+        onPopInvoked: (_) => MySnackbar.failed(
+          context,
+          message: 'Nilai kamu akan "0" jika kamu keluar.',
+        ),
+        child: Scaffold(
+          body: Stack(
+            children: [
+              const _ViewBackground(),
+              _ViewForeground(
+                progressValue: progressValue,
+                remainingTime: remainingTime,
+                question: question,
+                onAnswerSelected: onAnswerSelected,
+                currentQuestionIndex: currentQuestionIndex,
+              ),
+            ],
+          ),
         ),
       ),
     );
