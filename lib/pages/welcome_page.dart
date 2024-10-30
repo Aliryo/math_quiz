@@ -52,6 +52,22 @@ class _WelcomePageState extends State<WelcomePage> {
             ),
             const SizedBox(height: 20),
             _WidgetGameButton(
+              onPressed: () => Future.delayed(const Duration(seconds: 1), () {
+                setState(() => _isError = false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ModulePage(
+                      kidName: _controller.text,
+                      isStartQuiz: false,
+                    ),
+                  ),
+                );
+              }),
+              label: 'Mulai Belajar',
+            ),
+            const SizedBox(height: 20),
+            _WidgetGameButton(
               onPressed: () => _controller.text.length > 3
                   ? Future.delayed(const Duration(seconds: 1), () {
                       setState(() => _isError = false);

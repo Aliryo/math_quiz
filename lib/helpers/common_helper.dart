@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class CommonHelper {
   const CommonHelper();
@@ -29,15 +31,31 @@ class CommonHelper {
   }
 
   //? Memilih Gambar Dari File Handphone
-  static Future<File?> selectImage() async {
+  static Future<File?> pickFile({
+    required List<String>? allowedExtensions,
+  }) async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['jpg', 'jpeg', 'png'],
+      allowedExtensions: allowedExtensions,
     );
 
     if (result != null && result.files.single.path != null) {
       return File(result.files.single.path!);
     }
+
     return null;
+  }
+
+  //? Download PDF Pembelajaran
+  static Future<String> downloadPdf(String url) async {
+    final response = await http.get(Uri.parse(url));
+    final bytes = response.bodyBytes;
+
+    final directory = await getTemporaryDirectory();
+    final file = File('${directory.path}/temp_pdf.pdf');
+
+    await file.writeAsBytes(bytes);
+
+    return file.path;
   }
 }

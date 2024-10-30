@@ -58,7 +58,7 @@ class ScorePage extends StatelessWidget {
           ),
         ),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
           child: MySelectionButton(
             title: 'Kembali',
             onTap: () => Navigator.of(context).pushAndRemoveUntil(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:math_quiz/pages/index.dart';
-import 'package:math_quiz/pages/teacher_pages/add_part_page.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class SettingPage extends StatefulWidget {
@@ -60,6 +59,17 @@ class _SettingPageState extends State<SettingPage> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => const AddQuestionPage(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    MySelectionButton(
+                      minWidth: double.infinity,
+                      title: 'Tambah Pembelajaran',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddLessonPage(),
                         ),
                       ),
                     ),

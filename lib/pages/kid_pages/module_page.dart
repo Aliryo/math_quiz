@@ -5,8 +5,13 @@ import 'package:math_quiz/pages/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class ModulePage extends StatefulWidget {
-  const ModulePage({super.key, required this.kidName});
+  const ModulePage({
+    super.key,
+    required this.kidName,
+    this.isStartQuiz = true,
+  });
   final String kidName;
+  final bool isStartQuiz;
 
   @override
   State<ModulePage> createState() => _ModulePageState();
@@ -73,6 +78,7 @@ class _ModulePageState extends State<ModulePage> {
                             builder: (_) => PartPage(
                               kidName: widget.kidName,
                               moduleName: moduleName,
+                              isStartQuiz: widget.isStartQuiz,
                             ),
                           ),
                         ),

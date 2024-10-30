@@ -15,6 +15,23 @@ class FirebaseHelper {
         .add(question.toMap());
   }
 
+  //? Menambah Materi Ke Firebase
+  static Future<void> addLesson(LessonMdl lesson) async {
+    final CollectionReference resultsRef =
+        FirebaseFirestore.instance.collection('lessons');
+
+    final QuerySnapshot querySnapshot =
+        await resultsRef.where('partName', isEqualTo: lesson.partName).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final String existingDocId = querySnapshot.docs.first.id;
+
+      await resultsRef.doc(existingDocId).update(lesson.toMap());
+    } else {
+      await resultsRef.add(lesson.toMap());
+    }
+  }
+
   //? Menambah Hasil Kuis Ke Firebase
   static Future<void> addResult(ResultMdl result) async {
     final CollectionReference resultsRef =
@@ -25,6 +42,7 @@ class FirebaseHelper {
 
     if (querySnapshot.docs.isNotEmpty) {
       final String existingDocId = querySnapshot.docs.first.id;
+
       await resultsRef.doc(existingDocId).update(result.toMap());
     } else {
       await resultsRef.add(result.toMap());
@@ -58,6 +76,22 @@ class FirebaseHelper {
     CommonHelper.knuthShuffle(questions);
 
     return questions;
+  }
+
+  //? Mengambil Data-Data Materi Dari Firebase
+  static Future<LessonMdl> fetchLesson(String partName) async {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('lessons')
+        .where('partName', isEqualTo: partName)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final doc = snapshot.docs.first;
+      return LessonMdl.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+    }
+
+    return const LessonMdl();
   }
 
   //? Mengambil Data-Data Modul Dari Firebase
@@ -140,12 +174,12 @@ class FirebaseHelper {
         .delete();
   }
 
-  //? Upload Gambar Ke Firebase
-  static Future<String?> uploadImage(File file) async {
+  //? Upload File Ke Firebase
+  static Future<String?> uploadFile(File file) async {
     final String fileName = file.path.split('/').last;
 
     final Reference storageRef =
-        FirebaseStorage.instance.ref().child('question_images/$fileName');
+        FirebaseStorage.instance.ref().child('quiz/$fileName');
 
     final UploadTask uploadTask = storageRef.putFile(file);
 

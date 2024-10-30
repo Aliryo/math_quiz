@@ -5,46 +5,38 @@ import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
-class AddQuestionPage extends StatefulWidget {
-  const AddQuestionPage({super.key});
+class AddLessonPage extends StatefulWidget {
+  const AddLessonPage({super.key});
 
   @override
-  State<AddQuestionPage> createState() => _AddQuestionPageState();
+  State<AddLessonPage> createState() => _AddLessonPageState();
 }
 
-class _AddQuestionPageState extends State<AddQuestionPage> {
-  final _options = ['', '', '', ''];
-
+class _AddLessonPageState extends State<AddLessonPage> {
   List<ModuleMdl> _modules = [];
   List<PartMdl> _parts = [];
 
   String? _selectedModuleName;
   String? _selectedPartName;
-  String? _questionText;
-  String? _correctAnswer;
-  String? _imageUrl;
+  String? _videoUrl;
+  String? _pdfUrl;
 
   File? _selectedFile;
 
   bool _isLoading = true;
 
   Future<void> _selectImage() async {
-    final File? file = await CommonHelper.pickFile(
-      allowedExtensions: ['jpg', 'jpeg', 'png'],
-    );
+    final File? file = await CommonHelper.pickFile(allowedExtensions: ['pdf']);
 
     if (file != null) {
       setState(() => _selectedFile = file);
     }
   }
 
-  Future<void> _uploadImage() async {
+  Future<void> _uploadPdf() async {
     //? Validasi Semua Harus Diisi
     if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_questionText == null || _questionText!.isEmpty) &&
-            _selectedFile == null ||
-        _correctAnswer == null ||
-        !_options.every((option) => option.isNotEmpty)) {
+        (_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
       setState(() => _isLoading = false);
 
       MySnackbar.failed(context, message: 'Semua form harus diisi.');
@@ -53,15 +45,15 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     }
 
     try {
-      //? Mengirim Gambar Ke Firebase
+      //? Mengirim File Ke Firebase
       setState(() => _isLoading = true);
 
-      final String? imageUrl = await FirebaseHelper.uploadFile(_selectedFile!);
+      final String? pdfUrl = await FirebaseHelper.uploadFile(_selectedFile!);
 
-      if (imageUrl != null) {
-        setState(() => _imageUrl = imageUrl);
+      if (pdfUrl != null) {
+        setState(() => _pdfUrl = pdfUrl);
 
-        await _submitQuestion();
+        await _submitLesson();
       } else {
         if (mounted) {
           if (mounted) {
@@ -77,13 +69,10 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     }
   }
 
-  Future<void> _submitQuestion() async {
+  Future<void> _submitLesson() async {
     //? Validasi Semua Harus Diisi
     if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_questionText == null || _questionText!.isEmpty) &&
-            _selectedFile == null ||
-        _correctAnswer == null ||
-        !_options.every((option) => option.isNotEmpty)) {
+        (_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
       setState(() => _isLoading = false);
 
       MySnackbar.failed(context, message: 'Semua form harus diisi.');
@@ -95,28 +84,25 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
       //? Mengirim Data Ke Firebase
       setState(() => _isLoading = true);
 
-      final question = QuestionMdl(
-        imageUrl: _imageUrl ?? '',
-        questionText: _questionText ?? '',
-        correctAnswer: _correctAnswer ?? '',
+      final lesson = LessonMdl(
         partName: _selectedPartName ?? '',
         moduleName: _selectedModuleName ?? '',
-        options: _options,
+        lessonPath:
+            (_pdfUrl?.isNotEmpty ?? false) ? _pdfUrl ?? '' : _videoUrl ?? '',
       );
 
-      await FirebaseHelper.addQuestion(question);
+      await FirebaseHelper.addLesson(lesson);
 
       if (mounted) {
         MySnackbar.success(
           context,
-          message: 'Pertanyaan berhasil ditambahkan.',
+          message: 'Pembelajaran berhasil ditambahkan.',
         );
       }
       setState(() {
         _selectedFile = null;
-        _imageUrl = null;
-        _questionText = null;
-        _correctAnswer = null;
+        _pdfUrl = null;
+        _videoUrl = null;
         _isLoading = false;
       });
     } catch (e) {
@@ -154,8 +140,6 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
   @override
   Widget build(BuildContext context) {
-    const answerLabels = ['A', 'B', 'C', 'D'];
-
     if (_isLoading) {
       return const MyLoading();
     }
@@ -166,7 +150,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pertanyaan Baru'),
+        title: const Text('Tambah Pembelajaran Baru'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -188,7 +172,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Gambar Soal :',
+                          'File Materi :',
                           style: TextStyle(fontSize: 16),
                         ),
                         IconButton(
@@ -198,7 +182,19 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Image.file(_selectedFile!, height: 200),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.picture_as_pdf),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _selectedFile?.path.split('/').last ?? '',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -269,40 +265,16 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
             if (_selectedFile == null) ...[
               const SizedBox(height: 20),
               MyInputField(
-                label: 'Teks Pertanyaan',
+                label: 'Link Video Pembelajaran',
                 onChanged: (text) {
-                  setState(() => _questionText = text);
+                  setState(() => _videoUrl = text);
                 },
               ),
             ],
-            for (int i = 0; i < 4; i++)
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: MyInputField(
-                  label: 'Opsi ${answerLabels[i]}',
-                  onChanged: (text) {
-                    setState(() => _options[i] = text);
-                  },
-                ),
-              ),
-            const SizedBox(height: 20),
-            MyDropdown<String>(
-              label: 'Jawaban Benar',
-              value: _correctAnswer,
-              items: answerLabels.map((String answer) {
-                return DropdownMenuItem<String>(
-                  value: answer,
-                  child: Text(answer),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() => _correctAnswer = newValue);
-              },
-            ),
             const SizedBox(height: 20),
             MySelectionButton(
-              onTap: _selectedFile != null ? _uploadImage : _submitQuestion,
-              title: 'Tambah Pertanyaan',
+              onTap: _selectedFile != null ? _uploadPdf : _submitLesson,
+              title: 'Tambah Pembelajaran',
             ),
             const SizedBox(height: 20),
           ],

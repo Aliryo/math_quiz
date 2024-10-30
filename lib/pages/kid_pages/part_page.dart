@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
 import 'package:math_quiz/pages/index.dart';
+import 'package:math_quiz/pages/kid_pages/lesson_page.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class PartPage extends StatefulWidget {
-  const PartPage({super.key, required this.kidName, required this.moduleName});
+  const PartPage({
+    super.key,
+    required this.kidName,
+    required this.moduleName,
+    this.isStartQuiz = true,
+  });
+
   final String kidName;
   final String moduleName;
+  final bool isStartQuiz;
 
   @override
   State<PartPage> createState() => _PartPageState();
@@ -17,19 +25,67 @@ class _PartPageState extends State<PartPage> {
   List<PartMdl> _parts = [];
   bool _isLoading = true;
 
+  @override
+  void initState() {
+    _fetchParts();
+    super.initState();
+  }
+
   Future<void> _fetchParts() async {
     final parts = await FirebaseHelper.fetchParts(widget.moduleName);
-
     setState(() {
       _parts = parts;
       _isLoading = false;
     });
   }
 
-  @override
-  void initState() {
-    _fetchParts();
-    super.initState();
+  void _onPartSelected(String partName) {
+    if (widget.isStartQuiz) {
+      _showOptionDialog(partName);
+    } else {
+      _navigateToLessonPage(partName);
+    }
+  }
+
+  void _showOptionDialog(String partName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _OptionDialog(
+          onTapQuiz: () {
+            Navigator.of(context).pop();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => QuizPage(
+                  kidName: widget.kidName,
+                  partName: partName,
+                ),
+              ),
+              (_) => false,
+            );
+          },
+          onTapResult: () {
+            Navigator.of(context).pop();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ResultPage(partName: partName),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _navigateToLessonPage(String partName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LessonPage(partName: partName),
+      ),
+    );
   }
 
   @override
@@ -58,51 +114,16 @@ class _PartPageState extends State<PartPage> {
               ),
               const SizedBox(height: 40),
               Column(
-                children: List.generate(
-                  _parts.length,
-                  (index) {
-                    final partName = _parts[index].partName;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: MySelectionButton(
-                        minWidth: double.infinity,
-                        title: partName,
-                        onTap: () => showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return _OptionDialog(
-                              onTapQuiz: () {
-                                Navigator.of(context).pop();
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => QuizPage(
-                                      kidName: widget.kidName,
-                                      partName: partName,
-                                    ),
-                                  ),
-                                  (_) => false,
-                                );
-                              },
-                              onTapResult: () {
-                                Navigator.of(context).pop();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ResultPage(
-                                      partName: partName,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                children: _parts.map((part) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: MySelectionButton(
+                      minWidth: double.infinity,
+                      title: part.partName,
+                      onTap: () => _onPartSelected(part.partName),
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ),
