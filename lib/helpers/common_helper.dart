@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class CommonHelper {
-  const CommonHelper();
+  CommonHelper._();
 
   //? Knuth Shuffle Menggunakan Bahasa Dart
   static void knuthShuffle(List list) {
@@ -46,8 +46,8 @@ class CommonHelper {
     return null;
   }
 
-  //? Download PDF Pembelajaran
-  static Future<String> downloadPdf(String url) async {
+  //? Mengakses PDF Pembelajaran
+  static Future<String> temporaryPdf(String url) async {
     final response = await http.get(Uri.parse(url));
     final bytes = response.bodyBytes;
 

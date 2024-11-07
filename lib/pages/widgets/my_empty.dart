@@ -5,8 +5,13 @@ import '../index.dart';
 import 'index.dart';
 
 class MyEmpty extends StatelessWidget {
-  const MyEmpty({super.key, required this.title});
+  const MyEmpty({
+    super.key,
+    required this.title,
+    this.isBackFromScorePage = false,
+  });
   final String title;
+  final bool isBackFromScorePage;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +38,14 @@ class MyEmpty extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         child: MySelectionButton(
           title: 'Kembali',
-          onTap: () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const WelcomePage(),
-            ),
-            (_) => false,
-          ),
+          onTap: () => isBackFromScorePage
+              ? Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => const WelcomePage(),
+                  ),
+                  (_) => false,
+                )
+              : Navigator.of(context).pop(),
         ),
       ),
     );

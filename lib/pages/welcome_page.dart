@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/pages/index.dart';
 
 class WelcomePage extends StatefulWidget {
@@ -11,11 +12,59 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   final _controller = TextEditingController();
   bool _isError = false;
+  bool _hasUsername = false;
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    _checkUsername();
+    super.initState();
+  }
+
+  Future<void> _checkUsername() async {
+    final hasUsername = await LocalDataHelper.checkUsername();
+    setState(() => _hasUsername = hasUsername);
+  }
+
+  void _navigateToModulePage(String kidName, {bool isStartQuiz = false}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ModulePage(
+          kidName: kidName,
+          isStartQuiz: isStartQuiz,
+        ),
+      ),
+    );
+  }
+
+  void _handleStartLearning() {
+    setState(() => _isError = false);
+    _navigateToModulePage(_controller.text);
+  }
+
+  Future<void> _handleStartQuiz() async {
+    if (!_hasUsername && _controller.text.length < 3) {
+      setState(() => _isError = true);
+      return;
+    }
+
+    setState(() => _isError = false);
+
+    if (!_hasUsername) await LocalDataHelper.saveUsername(_controller.text);
+
+    final kidName = _controller.text.isNotEmpty
+        ? _controller.text
+        : await LocalDataHelper.getUsername();
+
+    if (context.mounted) {
+      _navigateToModulePage(kidName, isStartQuiz: true);
+    }
   }
 
   @override
@@ -44,43 +93,22 @@ class _WelcomePageState extends State<WelcomePage> {
               height: 400,
             ),
             const SizedBox(height: 40),
-            _WidgetTextField(
-              label: 'Nama Lengkap',
-              hintText: 'Masukkan Nama Lengkap Kamu',
-              controller: _controller,
-              isError: _isError,
-            ),
-            const SizedBox(height: 20),
+            if (!_hasUsername) ...[
+              _WidgetTextField(
+                label: 'Nama Lengkap',
+                hintText: 'Masukkan Nama Lengkap Kamu',
+                controller: _controller,
+                isError: _isError,
+              ),
+              const SizedBox(height: 20),
+            ],
             _WidgetGameButton(
-              onPressed: () => Future.delayed(const Duration(seconds: 1), () {
-                setState(() => _isError = false);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ModulePage(
-                      kidName: _controller.text,
-                      isStartQuiz: false,
-                    ),
-                  ),
-                );
-              }),
+              onPressed: _handleStartLearning,
               label: 'Mulai Belajar',
             ),
             const SizedBox(height: 20),
             _WidgetGameButton(
-              onPressed: () => _controller.text.length > 3
-                  ? Future.delayed(const Duration(seconds: 1), () {
-                      setState(() => _isError = false);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModulePage(
-                            kidName: _controller.text,
-                          ),
-                        ),
-                      );
-                    })
-                  : setState(() => _isError = true),
+              onPressed: _handleStartQuiz,
               label: 'Mulai Kuis',
             ),
           ],

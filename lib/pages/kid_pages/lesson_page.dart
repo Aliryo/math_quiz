@@ -26,7 +26,7 @@ class _LessonPageState extends State<LessonPage> {
     setState(() => _lesson = lesson);
 
     if (_lesson.lessonPath.contains('pdf')) {
-      final pdfFilePath = await CommonHelper.downloadPdf(_lesson.lessonPath);
+      final pdfFilePath = await CommonHelper.temporaryPdf(_lesson.lessonPath);
 
       setState(() => _pdfFilePath = pdfFilePath);
     } else if (_lesson.lessonPath.isNotEmpty) {

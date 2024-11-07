@@ -97,45 +97,10 @@ class _ResultPageState extends State<ResultPage> {
 
                               final isWinner = score >= 80;
 
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isWinner
-                                      ? Colors.deepPurpleAccent
-                                      : Colors.deepPurpleAccent[100],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        result.name,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: isWinner
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      score.toString(),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: isWinner
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    if (isWinner)
-                                      const Icon(Icons.star,
-                                          color: Colors.amber),
-                                  ],
-                                ),
+                              return _ResultItem(
+                                name: result.name,
+                                isWinner: isWinner,
+                                score: score,
                               );
                             }).toList(),
                           ),
@@ -149,6 +114,55 @@ class _ResultPageState extends State<ResultPage> {
           ],
         ),
         backgroundColor: Colors.white,
+      ),
+    );
+  }
+}
+
+class _ResultItem extends StatelessWidget {
+  const _ResultItem({
+    required this.name,
+    required this.isWinner,
+    required this.score,
+  });
+
+  final String name;
+  final bool isWinner;
+  final int score;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color:
+            isWinner ? Colors.deepPurpleAccent : Colors.deepPurpleAccent[100],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+          Text(
+            score.toString(),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (isWinner) const Icon(Icons.star, color: Colors.amber),
+        ],
       ),
     );
   }
