@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/pages/index.dart';
@@ -56,7 +58,12 @@ class _WelcomePageState extends State<WelcomePage> {
 
     setState(() => _isError = false);
 
-    if (!_hasUsername) await LocalDataHelper.saveUsername(_controller.text);
+    log('COKKK $_hasUsername');
+
+    if (!_hasUsername) {
+      await LocalDataHelper.saveUsername(_controller.text);
+      await FirebaseHelper.addKidName(_controller.text);
+    }
 
     final kidName = _controller.text.isNotEmpty
         ? _controller.text
@@ -70,19 +77,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingPage(),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

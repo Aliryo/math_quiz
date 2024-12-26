@@ -8,6 +8,13 @@ import 'package:math_quiz/models/index.dart';
 class FirebaseHelper {
   FirebaseHelper._();
 
+  //? Menambah Nama Siswa Ke Firebase
+  static Future<void> addKidName(String kidName) async {
+    await FirebaseFirestore.instance
+        .collection('siswa')
+        .add({'kidName': kidName});
+  }
+
   //? Menambah Pertanyaan Kuis Ke Firebase
   static Future<void> addQuestion(QuestionMdl question) async {
     await FirebaseFirestore.instance
