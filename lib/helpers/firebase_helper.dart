@@ -59,6 +59,16 @@ class FirebaseHelper {
     await FirebaseFirestore.instance.collection('parts').add(part.toMap());
   }
 
+  //? Mengambil Data-Data Nama Siswa Dari Firebase
+  static Future<List<StudentsMdl>> fetchStudents() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('students').get();
+
+    return snapshot.docs
+        .map((doc) => StudentsMdl.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
   //? Mengambil Data-Data Kuis Dari Firebase Lalu Dilakukan Knuth Shuffle
   static Future<List<QuestionMdl>> fetchAndShuffleQuestions(
     String partName,
@@ -73,7 +83,7 @@ class FirebaseHelper {
             QuestionMdl.fromMap(doc.data() as Map<String, dynamic>, doc.id))
         .toList();
 
-    CommonHelper.knuthShuffle(questions);
+    CommonHelper.fisherYatestShuffle(questions);
 
     return questions;
   }
@@ -148,6 +158,22 @@ class FirebaseHelper {
     });
 
     return filteredResults;
+  }
+
+  //? Mengedit Nama Siswa Di Firebase
+  static Future<void> editStudent(String documentId, String newKidName) async {
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(documentId)
+        .update({'kidName': newKidName});
+  }
+
+  //? Menghapus Satu Nama Siswa
+  static Future<void> deleteStudent(String documentId) async {
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(documentId)
+        .delete();
   }
 
   //? Menghapus Satu Pertanyaan

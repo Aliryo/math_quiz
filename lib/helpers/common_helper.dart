@@ -8,8 +8,8 @@ import 'package:path_provider/path_provider.dart';
 class CommonHelper {
   const CommonHelper();
 
-  //? Knuth Shuffle Menggunakan Bahasa Dart
-  static void knuthShuffle(List list) {
+  //? Fisher Yatest Shuffle Menggunakan Bahasa Dart
+  static void fisherYatestShuffle(List list) {
     final Random random = Random();
     for (int i = list.length - 1; i > 0; i--) {
       final j = random.nextInt(i + 1);

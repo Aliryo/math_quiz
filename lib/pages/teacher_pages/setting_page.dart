@@ -73,6 +73,17 @@ class _SettingPageState extends State<SettingPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    MySelectionButton(
+                      minWidth: double.infinity,
+                      title: 'Daftar Siswa',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ListStudentPage(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

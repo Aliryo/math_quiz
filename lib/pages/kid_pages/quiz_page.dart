@@ -9,6 +9,7 @@ import 'package:math_quiz/pages/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class QuizPage extends StatefulWidget {
+  // TODO(Aliryo): shuffle answer index
   const QuizPage({super.key, required this.kidName, required this.partName});
   final String kidName;
   final String partName;
@@ -412,6 +413,7 @@ class _WidgetAnswer extends StatefulWidget {
 
   final String answer;
   final String label;
+
   final VoidCallback onTap;
 
   @override
