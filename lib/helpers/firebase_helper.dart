@@ -11,7 +11,7 @@ class FirebaseHelper {
   //? Menambah Nama Siswa Ke Firebase
   static Future<void> addKidName(String kidName) async {
     await FirebaseFirestore.instance
-        .collection('siswa')
+        .collection('students')
         .add({'kidName': kidName});
   }
 
