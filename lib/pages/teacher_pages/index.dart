@@ -3,4 +3,7 @@ export 'add_module_page.dart';
 export 'add_part_page.dart';
 export 'add_question_page.dart';
 export 'list_student_page.dart';
+export 'list_module_page.dart';
+export 'list_part_page.dart';
+export 'list_question_page.dart';
 export 'setting_page.dart';

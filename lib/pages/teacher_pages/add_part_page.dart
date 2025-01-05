@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../helpers/index.dart';
 import '../../models/index.dart';
+import '../index.dart';
 import '../widgets/index.dart';
 
 class AddPartPage extends StatefulWidget {
-  const AddPartPage({super.key});
+  const AddPartPage({
+    super.key,
+    this.partToEdit,
+    this.isEdit = false,
+  });
+  final PartMdl? partToEdit;
+  final bool isEdit;
 
   @override
   State<AddPartPage> createState() => _AddPartPageState();
@@ -32,16 +39,25 @@ class _AddPartPageState extends State<AddPartPage> {
     try {
       //? Mengirim Data Ke Firebase
       setState(() => _isLoading = true);
+
       final part = PartMdl(
         moduleName: _selectedModuleName ?? '',
         partName: _partName ?? '',
       );
 
-      await FirebaseHelper.addPart(part);
+      if (widget.isEdit) {
+        await FirebaseHelper.editPart(widget.partToEdit!.id, part);
+        if (mounted) {
+          MySnackbar.success(context, message: 'Materi berhasil diubah.');
+        }
+      } else {
+        await FirebaseHelper.addPart(part);
 
-      if (mounted) {
-        MySnackbar.success(context, message: 'Materi berhasil ditambahkan.');
+        if (mounted) {
+          MySnackbar.success(context, message: 'Materi berhasil ditambahkan.');
+        }
       }
+
       setState(() => _isLoading = false);
     } catch (e) {
       //? Jika Terdapat Kegagalan
@@ -63,6 +79,11 @@ class _AddPartPageState extends State<AddPartPage> {
 
   @override
   void initState() {
+    if (widget.isEdit && widget.partToEdit != null) {
+      _selectedModuleName = widget.partToEdit!.moduleName;
+      _partName = widget.partToEdit!.partName;
+    }
+
     _fetchModules();
     super.initState();
   }
@@ -79,7 +100,7 @@ class _AddPartPageState extends State<AddPartPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Materi Baru'),
+        title: Text(widget.isEdit ? 'Edit Materi' : 'Tambah Materi Baru'),
         centerTitle: true,
       ),
       body: Center(
@@ -105,16 +126,25 @@ class _AddPartPageState extends State<AddPartPage> {
               const SizedBox(height: 20),
               MyInputField(
                 label: 'Nama Materi',
+                initialValue: _partName,
                 onChanged: (text) {
-                  setState(() {
-                    _partName = text;
-                  });
+                  setState(() => _partName = text);
                 },
               ),
               const SizedBox(height: 20),
               MySelectionButton(
                 onTap: _submitPart,
-                title: 'Tambah Materi',
+                title: widget.isEdit ? 'Ubah Materi' : 'Tambah Materi',
+              ),
+              const SizedBox(height: 20),
+              MySelectionButton(
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ListPartPage(),
+                  ),
+                ),
+                title: 'Daftar Materi',
               ),
             ],
           ),

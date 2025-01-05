@@ -21,69 +21,70 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingPage(),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Image.asset(
-              'lib/assets/menu.png',
-              width: double.infinity,
-              height: 400,
-            ),
-            const SizedBox(height: 40),
-            _WidgetTextField(
-              label: 'Nama Lengkap',
-              hintText: 'Masukkan Nama Lengkap Kamu',
-              controller: _controller,
-              isError: _isError,
-            ),
-            const SizedBox(height: 20),
-            _WidgetGameButton(
-              onPressed: () => Future.delayed(const Duration(seconds: 1), () {
-                setState(() => _isError = false);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ModulePage(
-                      kidName: _controller.text,
-                      isStartQuiz: false,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SettingPage(),
                     ),
                   ),
-                );
-              }),
-              label: 'Mulai Belajar',
-            ),
-            const SizedBox(height: 20),
-            _WidgetGameButton(
-              onPressed: () => _controller.text.length > 3
-                  ? Future.delayed(const Duration(seconds: 1), () {
-                      setState(() => _isError = false);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ModulePage(
-                            kidName: _controller.text,
+                ),
+              ),
+              Image.asset(
+                'lib/assets/menu.png',
+                width: double.infinity,
+                height: 400,
+              ),
+              const SizedBox(height: 40),
+              _WidgetTextField(
+                label: 'Nama Lengkap',
+                hintText: 'Masukkan Nama Lengkap Kamu',
+                controller: _controller,
+                isError: _isError,
+              ),
+              const SizedBox(height: 20),
+              _WidgetGameButton(
+                onPressed: () => Future.delayed(const Duration(seconds: 1), () {
+                  setState(() => _isError = false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ModulePage(
+                        kidName: _controller.text,
+                        isStartQuiz: false,
+                      ),
+                    ),
+                  );
+                }),
+                label: 'Mulai Belajar',
+              ),
+              const SizedBox(height: 20),
+              _WidgetGameButton(
+                onPressed: () => _controller.text.length > 3
+                    ? Future.delayed(const Duration(seconds: 1), () {
+                        setState(() => _isError = false);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ModulePage(
+                              kidName: _controller.text,
+                            ),
                           ),
-                        ),
-                      );
-                    })
-                  : setState(() => _isError = true),
-              label: 'Mulai Kuis',
-            ),
-          ],
+                        );
+                      })
+                    : setState(() => _isError = true),
+                label: 'Mulai Kuis',
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -5,16 +5,23 @@ import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
+import '../index.dart';
+
 class AddQuestionPage extends StatefulWidget {
-  const AddQuestionPage({super.key});
+  const AddQuestionPage({
+    super.key,
+    this.questionToEdit,
+    this.isEdit = false,
+  });
+  final QuestionMdl? questionToEdit;
+  final bool isEdit;
 
   @override
   State<AddQuestionPage> createState() => _AddQuestionPageState();
 }
 
 class _AddQuestionPageState extends State<AddQuestionPage> {
-  final _options = ['', '', '', ''];
-
+  List<String> _options = ['', '', '', ''];
   List<ModuleMdl> _modules = [];
   List<PartMdl> _parts = [];
 
@@ -35,6 +42,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
     if (file != null) {
       setState(() => _selectedFile = file);
+      setState(() => _imageUrl = null);
     }
   }
 
@@ -42,7 +50,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     //? Validasi Semua Harus Diisi
     if ((_selectedModuleName == null || _selectedPartName == null) ||
         (_questionText == null || _questionText!.isEmpty) &&
-            _selectedFile == null ||
+            (_selectedFile == null && _imageUrl!.isEmpty) ||
         _correctAnswer == null ||
         !_options.every((option) => option.isNotEmpty)) {
       setState(() => _isLoading = false);
@@ -81,7 +89,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     //? Validasi Semua Harus Diisi
     if ((_selectedModuleName == null || _selectedPartName == null) ||
         (_questionText == null || _questionText!.isEmpty) &&
-            _selectedFile == null ||
+            (_selectedFile == null && _imageUrl!.isEmpty) ||
         _correctAnswer == null ||
         !_options.every((option) => option.isNotEmpty)) {
       setState(() => _isLoading = false);
@@ -104,7 +112,11 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
         options: _options,
       );
 
-      await FirebaseHelper.addQuestion(question);
+      if (widget.isEdit) {
+        await FirebaseHelper.editQuestion(widget.questionToEdit!.id, question);
+      } else {
+        await FirebaseHelper.addQuestion(question);
+      }
 
       if (mounted) {
         MySnackbar.success(
@@ -148,6 +160,17 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
   @override
   void initState() {
+    if (widget.isEdit && widget.questionToEdit != null) {
+      _correctAnswer = widget.questionToEdit!.correctAnswer;
+      _imageUrl = widget.questionToEdit!.imageUrl;
+      _questionText = widget.questionToEdit!.questionText;
+      _options = widget.questionToEdit!.options;
+      _selectedModuleName = widget.questionToEdit!.moduleName;
+      _selectedPartName = widget.questionToEdit!.partName;
+
+      _fetchParts(widget.questionToEdit!.moduleName);
+    }
+
     _fetchModules();
     super.initState();
   }
@@ -166,14 +189,16 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pertanyaan Baru'),
+        title: Text(
+          widget.isEdit ? 'Edit Pertanyaan' : 'Tambah Pertanyaan Baru',
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            if (_selectedFile != null) ...[
+            if (_selectedFile != null || _imageUrl != null) ...[
               Container(
                 padding: const EdgeInsets.all(8),
                 margin: const EdgeInsets.only(bottom: 20),
@@ -193,12 +218,20 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => setState(() => _selectedFile = null),
+                          onPressed: () => setState(() {
+                            _selectedFile = null;
+                            _imageUrl = null;
+                          }),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Image.file(_selectedFile!, height: 200),
+                    (_imageUrl?.isNotEmpty ?? false)
+                        ? Image.network(
+                            _imageUrl!,
+                            height: 200,
+                          )
+                        : Image.file(_selectedFile!, height: 200),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -224,22 +257,26 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
                 _fetchParts(newValue ?? '');
               },
             ),
-            if (_parts.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              MyDropdown<String>(
-                label: 'Pilih Materi',
-                value: _selectedPartName,
-                items: _parts.map((PartMdl parts) {
-                  return DropdownMenuItem<String>(
-                    value: parts.partName,
-                    child: Text(parts.partName),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() => _selectedPartName = newValue);
-                },
-              ),
-            ],
+            const SizedBox(height: 20),
+            MyDropdown<String>(
+              label: 'Pilih Materi',
+              value: _selectedPartName,
+              items: _parts.isEmpty
+                  ? [
+                      const DropdownMenuItem(
+                        child: Text('Pilih Modul Dulu'),
+                      )
+                    ]
+                  : _parts.map((PartMdl parts) {
+                      return DropdownMenuItem<String>(
+                        value: parts.partName,
+                        child: Text(parts.partName),
+                      );
+                    }).toList(),
+              onChanged: (String? newValue) {
+                setState(() => _selectedPartName = newValue);
+              },
+            ),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: _selectImage,
@@ -270,6 +307,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
               const SizedBox(height: 20),
               MyInputField(
                 label: 'Teks Pertanyaan',
+                initialValue: _questionText,
                 onChanged: (text) {
                   setState(() => _questionText = text);
                 },
@@ -279,6 +317,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: MyInputField(
+                  initialValue: _options[i],
                   label: 'Opsi ${answerLabels[i]}',
                   onChanged: (text) {
                     setState(() => _options[i] = text);
@@ -302,9 +341,18 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
             const SizedBox(height: 20),
             MySelectionButton(
               onTap: _selectedFile != null ? _uploadImage : _submitQuestion,
-              title: 'Tambah Pertanyaan',
+              title: widget.isEdit ? 'Ubah Pertanyaan' : 'Tambah Pertanyaan',
             ),
             const SizedBox(height: 20),
+            MySelectionButton(
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ListQuestionPage(),
+                ),
+              ),
+              title: 'Daftar Pertanyaan',
+            ),
           ],
         ),
       ),

@@ -31,8 +31,6 @@ class _ListStudentPageState extends State<ListStudentPage> {
     super.initState();
   }
 
-  void showSnackBar() {}
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -44,6 +42,7 @@ class _ListStudentPageState extends State<ListStudentPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Daftar Siswa Terdaftar'),
         centerTitle: true,
@@ -54,7 +53,7 @@ class _ListStudentPageState extends State<ListStudentPage> {
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/math.png',
+                'lib/assets/quiz.png',
                 height: 320,
               ),
               const SizedBox(height: 40),
@@ -77,13 +76,23 @@ class _ListStudentPageState extends State<ListStudentPage> {
                         onTap: () {
                           showModalBottomSheet(
                             context: context,
+                            isScrollControlled: true,
                             builder: (context) {
-                              return Container(
-                                  padding: const EdgeInsets.all(16),
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  left: 16,
+                                  right: 16,
+                                  top: 16,
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom +
+                                          16,
+                                ),
+                                child: SingleChildScrollView(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       MyInputField(
+                                        label: 'Masukkan Nama Baru',
                                         onChanged: (text) {
                                           setState(() => _newKidnName = text);
                                         },
@@ -112,7 +121,9 @@ class _ListStudentPageState extends State<ListStudentPage> {
                                         },
                                       )
                                     ],
-                                  ));
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },

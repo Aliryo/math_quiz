@@ -24,4 +24,16 @@ class PartMdl {
       partName: data['partName'] as String,
     );
   }
+
+  PartMdl copyWith({
+    String? id,
+    String? moduleName,
+    String? partName,
+  }) {
+    return PartMdl(
+      id: id ?? this.id,
+      moduleName: moduleName ?? this.moduleName,
+      partName: partName ?? this.partName,
+    );
+  }
 }

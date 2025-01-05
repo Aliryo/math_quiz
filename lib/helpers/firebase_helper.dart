@@ -69,7 +69,7 @@ class FirebaseHelper {
         .toList();
   }
 
-  //? Mengambil Data-Data Kuis Dari Firebase Lalu Dilakukan Knuth Shuffle
+  //? Mengambil Data-Data Kuis Dari Firebase
   static Future<List<QuestionMdl>> fetchAndShuffleQuestions(
     String partName,
   ) async {
@@ -84,6 +84,19 @@ class FirebaseHelper {
         .toList();
 
     CommonHelper.fisherYatestShuffle(questions);
+
+    return questions;
+  }
+
+  //? Mengambil Semua Kuis Dari Firebase
+  static Future<List<QuestionMdl>> fetchAllQuestions() async {
+    final QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('questions').get();
+
+    List<QuestionMdl> questions = snapshot.docs
+        .map((doc) =>
+            QuestionMdl.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
 
     return questions;
   }
@@ -132,6 +145,19 @@ class FirebaseHelper {
     return parts;
   }
 
+  //? Mengambil Semua Data Materi Dari Firebase
+  static Future<List<PartMdl>> fetchAllParts() async {
+    final QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('parts').get();
+
+    List<PartMdl> parts = snapshot.docs
+        .map((doc) =>
+            PartMdl.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+
+    return parts;
+  }
+
   //? Mengambil Data-Data Hasil Siswa Dari Firebase
   static Future<List<ResultMdl>> fetchResults(String partName) async {
     final QuerySnapshot<Map<String, dynamic>> resultsRef =
@@ -166,6 +192,31 @@ class FirebaseHelper {
         .collection('students')
         .doc(documentId)
         .update({'kidName': newKidName});
+  }
+
+  //? Mengedit Pertanyaan Di Firebase
+  static Future<void> editQuestion(String id, QuestionMdl newQuestion) async {
+    await FirebaseFirestore.instance
+        .collection('questions')
+        .doc(id)
+        .update(newQuestion.toMap());
+  }
+
+  //? Mengedit Modul Di Firebase
+  static Future<void> editModule(
+      String documentId, String newModuleName) async {
+    await FirebaseFirestore.instance
+        .collection('modules')
+        .doc(documentId)
+        .update({'moduleName': newModuleName});
+  }
+
+  //? Mengedit Modul Di Firebase
+  static Future<void> editPart(String documentId, PartMdl newPart) async {
+    await FirebaseFirestore.instance
+        .collection('parts')
+        .doc(documentId)
+        .update(newPart.toMap());
   }
 
   //? Menghapus Satu Nama Siswa

@@ -9,6 +9,8 @@ class SettingPage extends StatefulWidget {
   State<SettingPage> createState() => _SettingPageState();
 }
 
+// TODO(Aliryo): implement UI for update delete for question
+
 class _SettingPageState extends State<SettingPage> {
   var _isAuthenticated = false;
 
@@ -32,7 +34,7 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 40),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Tambah Modul',
+                      title: 'Pengaturan Modul',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -43,7 +45,7 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 12),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Tambah Materi',
+                      title: 'Pengaturan Materi',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -54,7 +56,7 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 12),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Tambah Pertanyaan',
+                      title: 'Pengaturan Pertanyaan',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -65,7 +67,7 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 12),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Tambah Pembelajaran',
+                      title: 'Pengaturan Pembelajaran',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -92,7 +94,7 @@ class _SettingPageState extends State<SettingPage> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: MyInputField(
-                  label: 'Masukan password',
+                  label: 'Masukkan password',
                   onChanged: (text) {
                     setState(() {
                       if (text == 'admin123') _isAuthenticated = true;
