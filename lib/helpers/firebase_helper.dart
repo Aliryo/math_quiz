@@ -80,7 +80,7 @@ class FirebaseHelper {
             QuestionMdl.fromMap(doc.data() as Map<String, dynamic>, doc.id))
         .toList();
 
-    CommonHelper.knuthShuffle(questions);
+    CommonHelper.fisherYatestShuffle(questions);
 
     return questions;
   }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/pages/index.dart';
@@ -15,6 +13,7 @@ class _WelcomePageState extends State<WelcomePage> {
   final _controller = TextEditingController();
   bool _isError = false;
   bool _hasUsername = false;
+  String _kidNameLocal = '';
 
   @override
   void dispose() {
@@ -30,7 +29,11 @@ class _WelcomePageState extends State<WelcomePage> {
 
   Future<void> _checkUsername() async {
     final hasUsername = await LocalDataHelper.checkUsername();
-    setState(() => _hasUsername = hasUsername);
+    final kidName = await LocalDataHelper.getUsername();
+    setState(() {
+      _hasUsername = hasUsername;
+      _kidNameLocal = kidName;
+    });
   }
 
   void _navigateToModulePage(String kidName, {bool isStartQuiz = false}) {
@@ -57,8 +60,6 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     setState(() => _isError = false);
-
-    log('COKKK $_hasUsername');
 
     if (!_hasUsername) {
       await LocalDataHelper.saveUsername(_controller.text);
@@ -87,16 +88,25 @@ class _WelcomePageState extends State<WelcomePage> {
               width: double.infinity,
               height: 400,
             ),
-            const SizedBox(height: 40),
             if (!_hasUsername) ...[
+              const SizedBox(height: 40),
               _WidgetTextField(
                 label: 'Nama Lengkap',
                 hintText: 'Masukkan Nama Lengkap Kamu',
                 controller: _controller,
                 isError: _isError,
               ),
-              const SizedBox(height: 20),
+            ] else ...[
+              Text(
+                'Halo, $_kidNameLocal',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
             ],
+            const SizedBox(height: 20),
             _WidgetGameButton(
               onPressed: _handleStartLearning,
               label: 'Mulai Belajar',

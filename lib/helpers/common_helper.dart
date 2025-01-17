@@ -9,7 +9,7 @@ class CommonHelper {
   CommonHelper._();
 
   //? Knuth Shuffle Menggunakan Bahasa Dart
-  static void knuthShuffle(List list) {
+  static void fisherYatestShuffle(List list) {
     final Random random = Random();
     for (int i = list.length - 1; i > 0; i--) {
       final j = random.nextInt(i + 1);
