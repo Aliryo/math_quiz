@@ -157,7 +157,6 @@ class FirebaseHelper {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('parts')
         .orderBy('moduleName', descending: false)
-        .orderBy('partName', descending: false)
         .get();
 
     List<PartMdl> parts = snapshot.docs
