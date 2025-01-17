@@ -198,7 +198,8 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            if (_selectedFile != null || _imageUrl != null) ...[
+            if ((_selectedFile != null || _imageUrl != null) &&
+                (widget.questionToEdit?.questionText.isEmpty ?? false)) ...[
               Container(
                 padding: const EdgeInsets.all(8),
                 margin: const EdgeInsets.only(bottom: 20),
