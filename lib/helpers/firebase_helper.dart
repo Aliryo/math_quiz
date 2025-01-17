@@ -103,8 +103,10 @@ class FirebaseHelper {
 
   //? Mengambil Data-Data Modul Dari Firebase
   static Future<List<ModuleMdl>> fetchModules() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('modules').get();
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('modules')
+        .orderBy('moduleName', descending: false)
+        .get();
 
     List<ModuleMdl> modules = snapshot.docs
         .map((doc) =>
@@ -118,6 +120,7 @@ class FirebaseHelper {
   static Future<List<PartMdl>> fetchParts(String moduleName) async {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('parts')
+        .orderBy('partName', descending: false)
         .where('moduleName', isEqualTo: moduleName)
         .get();
 
