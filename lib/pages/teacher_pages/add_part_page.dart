@@ -55,7 +55,10 @@ class _AddPartPageState extends State<AddPartPage> {
 
         if (mounted) {
           Navigator.of(context).pop();
-          MySnackbar.success(context, message: 'Materi berhasil ditambahkan.');
+          MySnackbar.success(context,
+              message: widget.isEdit
+                  ? 'Materi berhasil diubah'
+                  : 'Materi berhasil ditambahkan.');
         }
       }
 

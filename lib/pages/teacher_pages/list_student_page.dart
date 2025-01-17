@@ -109,6 +109,9 @@ class _ListStudentPageState extends State<ListStudentPage> {
                                             await _fetchStudents();
                                             if (context.mounted) {
                                               Navigator.pop(context);
+                                              MySnackbar.success(context,
+                                                  message:
+                                                      'Siswa berhasil diubah.');
                                             }
                                           } else {
                                             Navigator.pop(context);

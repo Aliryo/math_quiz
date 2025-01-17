@@ -122,7 +122,9 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
         Navigator.of(context).pop();
         MySnackbar.success(
           context,
-          message: 'Pertanyaan berhasil ditambahkan.',
+          message: widget.isEdit
+              ? 'Pertanyaan berhasil diubah'
+              : 'Pertanyaan berhasil ditambahkan.',
         );
       }
       setState(() {

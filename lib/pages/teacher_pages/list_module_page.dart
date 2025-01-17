@@ -111,6 +111,9 @@ class _ListModulePageState extends State<ListModulePage> {
                                               await _fetchModules();
                                               if (context.mounted) {
                                                 Navigator.pop(context);
+                                                MySnackbar.success(context,
+                                                    message:
+                                                        'Modul berhasil diubah.');
                                               }
                                             } else {
                                               Navigator.pop(context);
