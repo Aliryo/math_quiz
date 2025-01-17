@@ -154,8 +154,11 @@ class FirebaseHelper {
 
   //? Mengambil Semua Data Materi Dari Firebase
   static Future<List<PartMdl>> fetchAllParts() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('parts').get();
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('parts')
+        .orderBy('moduleName', descending: false)
+        .orderBy('partName', descending: false)
+        .get();
 
     List<PartMdl> parts = snapshot.docs
         .map((doc) =>
