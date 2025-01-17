@@ -54,6 +54,7 @@ class _AddPartPageState extends State<AddPartPage> {
         await FirebaseHelper.addPart(part);
 
         if (mounted) {
+          Navigator.of(context).pop();
           MySnackbar.success(context, message: 'Materi berhasil ditambahkan.');
         }
       }

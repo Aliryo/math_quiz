@@ -119,6 +119,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
       }
 
       if (mounted) {
+        Navigator.of(context).pop();
         MySnackbar.success(
           context,
           message: 'Pertanyaan berhasil ditambahkan.',

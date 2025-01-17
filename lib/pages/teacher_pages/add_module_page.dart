@@ -34,6 +34,7 @@ class _AddModulePageState extends State<AddModulePage> {
       await FirebaseHelper.addModule(module);
 
       if (mounted) {
+        Navigator.of(context).pop();
         MySnackbar.success(context, message: 'Modul berhasil ditambahkan.');
       }
       setState(() => _isLoading = false);

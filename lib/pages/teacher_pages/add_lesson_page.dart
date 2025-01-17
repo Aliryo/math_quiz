@@ -94,6 +94,7 @@ class _AddLessonPageState extends State<AddLessonPage> {
       await FirebaseHelper.addLesson(lesson);
 
       if (mounted) {
+        Navigator.of(context).pop();
         MySnackbar.success(
           context,
           message: 'Pembelajaran berhasil ditambahkan.',
