@@ -252,7 +252,7 @@ class _AddLessonPageState extends State<AddLessonPage> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Upload Gambar Pertanyaan',
+                        'Upload Gambar Pembelajaran',
                         style: TextStyle(fontSize: 16),
                       ),
                     ),

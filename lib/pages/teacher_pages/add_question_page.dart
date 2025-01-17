@@ -198,8 +198,8 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            if ((_selectedFile != null || _imageUrl != null) &&
-                (widget.questionToEdit?.questionText.isEmpty ?? false)) ...[
+            if ((_imageUrl?.isNotEmpty ?? false) ||
+                (_selectedFile?.path.isNotEmpty ?? false)) ...[
               Container(
                 padding: const EdgeInsets.all(8),
                 margin: const EdgeInsets.only(bottom: 20),
@@ -227,16 +227,20 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    (_imageUrl?.isNotEmpty ?? false)
-                        ? Image.network(
-                            _imageUrl!,
-                            height: 200,
-                          )
-                        : Image.file(_selectedFile!, height: 200),
+                    if (_imageUrl?.isNotEmpty ?? false) ...[
+                      Image.network(
+                        _imageUrl!,
+                        height: 200,
+                      )
+                    ] else if (_selectedFile?.path.isNotEmpty ?? false) ...[
+                      Image.file(_selectedFile!, height: 200)
+                    ],
                     const SizedBox(height: 40),
                   ],
                 ),
               ),
+            ] else ...[
+              const SizedBox(),
             ],
             MyDropdown<String>(
               label: 'Pilih Modul',
