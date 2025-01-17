@@ -61,8 +61,10 @@ class FirebaseHelper {
 
   //? Mengambil Data-Data Nama Siswa Dari Firebase
   static Future<List<StudentsMdl>> fetchStudents() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('students').get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('students')
+        .orderBy('kidName', descending: false)
+        .get();
 
     return snapshot.docs
         .map((doc) => StudentsMdl.fromMap(doc.data(), doc.id))
@@ -75,6 +77,7 @@ class FirebaseHelper {
   ) async {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('questions')
+        .orderBy('partName', descending: false)
         .where('partName', isEqualTo: partName)
         .get();
 
@@ -90,8 +93,10 @@ class FirebaseHelper {
 
   //? Mengambil Semua Kuis Dari Firebase
   static Future<List<QuestionMdl>> fetchAllQuestions() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('questions').get();
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('questions')
+        .orderBy('partName', descending: false)
+        .get();
 
     List<QuestionMdl> questions = snapshot.docs
         .map((doc) =>
@@ -119,8 +124,10 @@ class FirebaseHelper {
 
   //? Mengambil Data-Data Modul Dari Firebase
   static Future<List<ModuleMdl>> fetchModules() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('modules').get();
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('modules')
+        .orderBy('moduleName', descending: false)
+        .get();
 
     List<ModuleMdl> modules = snapshot.docs
         .map((doc) =>
