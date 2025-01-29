@@ -1,22 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:math_quiz/pages/index.dart';
 
-class WelcomePage extends StatefulWidget {
+class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
-
-  @override
-  State<WelcomePage> createState() => _WelcomePageState();
-}
-
-class _WelcomePageState extends State<WelcomePage> {
-  final _controller = TextEditingController();
-  bool _isError = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,44 +30,33 @@ class _WelcomePageState extends State<WelcomePage> {
                 height: 400,
               ),
               const SizedBox(height: 40),
-              _WidgetTextField(
-                label: 'Nama Lengkap',
-                hintText: 'Masukkan Nama Lengkap Kamu',
-                controller: _controller,
-                isError: _isError,
-              ),
-              const SizedBox(height: 20),
               _WidgetGameButton(
                 onPressed: () => Future.delayed(const Duration(seconds: 1), () {
-                  setState(() => _isError = false);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ModulePage(
-                        kidName: _controller.text,
+                      builder: (_) => const ModulePage(
+                        kidName: '',
                         isStartQuiz: false,
                       ),
                     ),
                   );
                 }),
-                label: 'Mulai Belajar',
+                label: 'Lihat Pembelajaran',
               ),
               const SizedBox(height: 20),
               _WidgetGameButton(
-                onPressed: () => _controller.text.length > 3
-                    ? Future.delayed(const Duration(seconds: 1), () {
-                        setState(() => _isError = false);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ModulePage(
-                              kidName: _controller.text,
-                            ),
-                          ),
-                        );
-                      })
-                    : setState(() => _isError = true),
-                label: 'Mulai Kuis',
+                onPressed: () => Future.delayed(const Duration(seconds: 1), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ModulePage(
+                        kidName: '',
+                      ),
+                    ),
+                  );
+                }),
+                label: 'Lihat Hasil Kuis',
               ),
             ],
           ),
