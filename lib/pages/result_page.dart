@@ -51,7 +51,7 @@ class _ResultPageState extends State<ResultPage> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Image.asset(
-                'lib/assets/background.jpg',
+                'assets/background.jpg',
                 fit: BoxFit.fill,
                 width: double.infinity,
                 height: double.infinity,
@@ -72,7 +72,7 @@ class _ResultPageState extends State<ResultPage> {
                     ),
                   ),
                   Image.asset(
-                    'lib/assets/trophy.png',
+                    'assets/trophy.png',
                     height: 360,
                   ),
                   Expanded(

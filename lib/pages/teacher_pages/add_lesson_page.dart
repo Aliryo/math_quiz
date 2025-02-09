@@ -3,27 +3,40 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
+import 'package:math_quiz/pages/kid_pages/lesson_page.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class AddLessonPage extends StatefulWidget {
-  const AddLessonPage({super.key});
+  const AddLessonPage({
+    super.key,
+    required this.moduleName,
+    required this.partName,
+  });
+  final String moduleName;
+  final String partName;
 
   @override
   State<AddLessonPage> createState() => _AddLessonPageState();
 }
 
 class _AddLessonPageState extends State<AddLessonPage> {
-  List<ModuleMdl> _modules = [];
-  List<PartMdl> _parts = [];
+  LessonMdl _lesson = const LessonMdl();
 
-  String? _selectedModuleName;
-  String? _selectedPartName;
   String? _videoUrl;
   String? _pdfUrl;
 
   File? _selectedFile;
 
   bool _isLoading = true;
+
+  Future<void> _fetchLesson() async {
+    final lesson = await FirebaseHelper.fetchLesson(widget.partName);
+
+    setState(() {
+      _lesson = lesson;
+      _isLoading = false;
+    });
+  }
 
   Future<void> _selectImage() async {
     final File? file = await CommonHelper.pickFile(allowedExtensions: ['pdf']);
@@ -35,8 +48,7 @@ class _AddLessonPageState extends State<AddLessonPage> {
 
   Future<void> _uploadPdf() async {
     //? Validasi Semua Harus Diisi
-    if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
+    if ((_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
       setState(() => _isLoading = false);
 
       MySnackbar.failed(context, message: 'Semua form harus diisi.');
@@ -71,8 +83,7 @@ class _AddLessonPageState extends State<AddLessonPage> {
 
   Future<void> _submitLesson() async {
     //? Validasi Semua Harus Diisi
-    if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
+    if ((_videoUrl == null || _videoUrl!.isEmpty) && _selectedFile == null) {
       setState(() => _isLoading = false);
 
       MySnackbar.failed(context, message: 'Semua form harus diisi.');
@@ -85,8 +96,8 @@ class _AddLessonPageState extends State<AddLessonPage> {
       setState(() => _isLoading = true);
 
       final lesson = LessonMdl(
-        partName: _selectedPartName ?? '',
-        moduleName: _selectedModuleName ?? '',
+        partName: widget.partName,
+        moduleName: widget.moduleName,
         lessonPath:
             (_pdfUrl?.isNotEmpty ?? false) ? _pdfUrl ?? '' : _videoUrl ?? '',
       );
@@ -115,27 +126,9 @@ class _AddLessonPageState extends State<AddLessonPage> {
     }
   }
 
-  Future<void> _fetchModules() async {
-    final modules = await FirebaseHelper.fetchModules();
-
-    setState(() {
-      _modules = modules;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _fetchParts(String moduleName) async {
-    final parts = await FirebaseHelper.fetchParts(moduleName);
-
-    setState(() {
-      _parts = parts;
-      _isLoading = false;
-    });
-  }
-
   @override
   void initState() {
-    _fetchModules();
+    _fetchLesson();
     super.initState();
   }
 
@@ -143,10 +136,6 @@ class _AddLessonPageState extends State<AddLessonPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const MyLoading();
-    }
-
-    if (_modules.isEmpty) {
-      return const MyEmpty(title: 'Belum ada modul yang ditambahkan.');
     }
 
     return Scaffold(
@@ -201,42 +190,6 @@ class _AddLessonPageState extends State<AddLessonPage> {
                 ),
               ),
             ],
-            MyDropdown<String>(
-              label: 'Pilih Modul',
-              value: _selectedModuleName,
-              items: _modules.map((ModuleMdl module) {
-                return DropdownMenuItem<String>(
-                  value: module.moduleName,
-                  child: Text(module.moduleName),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedModuleName = newValue;
-                  _parts = [];
-                  _selectedPartName = null;
-                  _isLoading = true;
-                });
-
-                _fetchParts(newValue ?? '');
-              },
-            ),
-            if (_parts.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              MyDropdown<String>(
-                label: 'Pilih Materi',
-                value: _selectedPartName,
-                items: _parts.map((PartMdl parts) {
-                  return DropdownMenuItem<String>(
-                    value: parts.partName,
-                    child: Text(parts.partName),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() => _selectedPartName = newValue);
-                },
-              ),
-            ],
             const SizedBox(height: 20),
             GestureDetector(
               onTap: _selectImage,
@@ -275,9 +228,23 @@ class _AddLessonPageState extends State<AddLessonPage> {
             const SizedBox(height: 20),
             MySelectionButton(
               onTap: _selectedFile != null ? _uploadPdf : _submitLesson,
-              title: 'Tambah Pembelajaran',
+              title: _lesson.lessonPath.isNotEmpty
+                  ? 'Ubah Pembelajaran'
+                  : 'Tambah Pembelajaran',
             ),
             const SizedBox(height: 20),
+            if (_lesson.lessonPath.isNotEmpty)
+              MySelectionButton(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LessonPage(
+                      partName: widget.partName,
+                    ),
+                  ),
+                ),
+                title: 'Lihat Pembelajaran',
+              ),
           ],
         ),
       ),

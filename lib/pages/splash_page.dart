@@ -28,7 +28,7 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          'lib/assets/splash.jpg',
+          'assets/splash.jpg',
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.fill,

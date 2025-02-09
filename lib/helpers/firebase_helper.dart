@@ -51,7 +51,20 @@ class FirebaseHelper {
 
   //? Menambah Modul Kuis Ke Firebase
   static Future<void> addModule(ModuleMdl module) async {
-    await FirebaseFirestore.instance.collection('modules').add(module.toMap());
+    final CollectionReference modulesRef =
+        FirebaseFirestore.instance.collection('modules');
+
+    final QuerySnapshot querySnapshot = await modulesRef
+        .where('moduleName', isEqualTo: module.moduleName)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final String existingDocId = querySnapshot.docs.first.id;
+
+      await modulesRef.doc(existingDocId).update(module.toMap());
+    } else {
+      await modulesRef.add(module.toMap());
+    }
   }
 
   //? Menambah Materi Kuis Ke Firebase
@@ -91,10 +104,10 @@ class FirebaseHelper {
   }
 
   //? Mengambil Semua Kuis Dari Firebase
-  static Future<List<QuestionMdl>> fetchAllQuestions() async {
+  static Future<List<QuestionMdl>> fetchQuestions(String partName) async {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('questions')
-        .orderBy('partName', descending: false)
+        .where('partName', isEqualTo: partName)
         .get();
 
     List<QuestionMdl> questions = snapshot.docs

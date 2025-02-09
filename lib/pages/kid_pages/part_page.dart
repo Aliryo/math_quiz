@@ -77,7 +77,11 @@ class _PartPageState extends State<PartPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pilih Materi Pembelajaran'),
+        title: Text(
+          'Pilih Materi Pembelajaran ${widget.moduleName}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -86,7 +90,7 @@ class _PartPageState extends State<PartPage> {
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/math.png',
+                'assets/math.png',
                 height: 320,
               ),
               const SizedBox(height: 40),

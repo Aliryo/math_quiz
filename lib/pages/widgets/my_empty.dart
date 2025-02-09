@@ -5,8 +5,10 @@ import '../index.dart';
 import 'index.dart';
 
 class MyEmpty extends StatelessWidget {
-  const MyEmpty({super.key, required this.title});
+  const MyEmpty({super.key, required this.title, this.onTapTitle, this.onTap});
   final String title;
+  final String? onTapTitle;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class MyEmpty extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'lib/assets/setting.png',
+              'assets/setting.png',
               height: 400,
             ),
             Text(
@@ -32,13 +34,14 @@ class MyEmpty extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         child: MySelectionButton(
-          title: 'Kembali',
-          onTap: () => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const WelcomePage(),
-            ),
-            (_) => false,
-          ),
+          title: onTapTitle ?? 'Kembali',
+          onTap: onTap ??
+              () => Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => const WelcomePage(),
+                    ),
+                    (_) => false,
+                  ),
         ),
       ),
     );

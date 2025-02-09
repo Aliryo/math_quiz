@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_quiz/models/index.dart';
+import 'package:math_quiz/pages/index.dart';
 
 import '../../helpers/index.dart';
 import '../widgets/index.dart';
@@ -25,13 +26,73 @@ class _ListModulePageState extends State<ListModulePage> {
     });
   }
 
+  void _addModule() async {
+    final bool? result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddModulePage()),
+    );
+
+    if (result ?? false) {
+      _fetchModules();
+    }
+  }
+
+  void _editModule(ModuleMdl module) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                MyInputField(
+                  label: 'Masukkan Nama Baru',
+                  onChanged: (text) {
+                    setState(() => _newModuleName = text);
+                  },
+                ),
+                const SizedBox(height: 12),
+                MySelectionButton(
+                  title: 'Ubah Nama Modul',
+                  onTap: () async {
+                    if (_newModuleName.isNotEmpty) {
+                      setState(() => _isLoading = true);
+                      await FirebaseHelper.editModule(
+                          module.id, _newModuleName);
+                      await _fetchModules();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        MySnackbar.success(context,
+                            message: 'Modul berhasil diubah.');
+                      }
+                    } else {
+                      Navigator.pop(context);
+                      MySnackbar.failed(context,
+                          message: 'Nama modul tidak valid.');
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     _fetchModules();
     super.initState();
   }
-
-  void showSnackBar() {}
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +101,11 @@ class _ListModulePageState extends State<ListModulePage> {
     }
 
     if (_modules.isEmpty) {
-      return const MyEmpty(title: 'Belum ada modul yang ditambahkan.');
+      return MyEmpty(
+        title: 'Belum ada modul yang ditambahkan.',
+        onTapTitle: 'Tambah Modul',
+        onTap: () => _addModule(),
+      );
     }
 
     return Scaffold(
@@ -48,13 +113,26 @@ class _ListModulePageState extends State<ListModulePage> {
         title: const Text('Daftar Modul'),
         centerTitle: true,
       ),
+      floatingActionButton: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.deepPurple,
+        ),
+        child: IconButton(
+          onPressed: () => _addModule(),
+          icon: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/quiz.png',
+                'assets/quiz.png',
                 height: 320,
               ),
               const SizedBox(height: 40),
@@ -74,76 +152,40 @@ class _ListModulePageState extends State<ListModulePage> {
                           ),
                         ),
                         title: Text(module.moduleName),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) {
-                              return Padding(
-                                  padding: EdgeInsets.only(
-                                    left: 16,
-                                    right: 16,
-                                    top: 16,
-                                    bottom: MediaQuery.of(context)
-                                            .viewInsets
-                                            .bottom +
-                                        16,
-                                  ),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        MyInputField(
-                                          label: 'Masukkan Nama Baru',
-                                          onChanged: (text) {
-                                            setState(
-                                                () => _newModuleName = text);
-                                          },
-                                        ),
-                                        const SizedBox(height: 12),
-                                        MySelectionButton(
-                                          title: 'Ubah Nama Modul',
-                                          onTap: () async {
-                                            if (_newModuleName.isNotEmpty) {
-                                              setState(() => _isLoading = true);
-                                              await FirebaseHelper.editModule(
-                                                  module.id, _newModuleName);
-                                              await _fetchModules();
-                                              if (context.mounted) {
-                                                Navigator.pop(context);
-                                                MySnackbar.success(context,
-                                                    message:
-                                                        'Modul berhasil diubah.');
-                                              }
-                                            } else {
-                                              Navigator.pop(context);
-                                              MySnackbar.failed(
-                                                context,
-                                                message:
-                                                    'Nama modul tidak valid.',
-                                              );
-                                            }
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                  ));
-                            },
-                          );
-                        },
-                        trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () async {
-                              setState(() => _isLoading = true);
-                              await FirebaseHelper.deleteModule(module.id);
-                              await _fetchModules();
-                            }),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ListPartPage(
+                              moduleName: module.moduleName,
+                            ),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.only(left: 12),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.green,
+                              onPressed: () => _editModule(module),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              color: Colors.red,
+                              onPressed: () async {
+                                setState(() => _isLoading = true);
+                                await FirebaseHelper.deleteModule(module.id);
+                                await _fetchModules();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
               ),
+              const SizedBox(height: 80),
             ],
           ),
         ),

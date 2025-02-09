@@ -18,7 +18,7 @@ class ScorePage extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Image.asset('lib/assets/score.png'),
+              Image.asset('assets/score.png'),
               IntrinsicHeight(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),

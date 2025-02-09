@@ -9,8 +9,6 @@ class SettingPage extends StatefulWidget {
   State<SettingPage> createState() => _SettingPageState();
 }
 
-// TODO(Aliryo): implement UI for update delete for question
-
 class _SettingPageState extends State<SettingPage> {
   var _isAuthenticated = false;
 
@@ -28,57 +26,24 @@ class _SettingPageState extends State<SettingPage> {
                 child: Column(
                   children: [
                     Image.asset(
-                      'lib/assets/setting.png',
+                      'assets/setting.png',
                       height: 400,
                     ),
                     const SizedBox(height: 40),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Pengaturan Modul',
+                      title: 'Pembelajaran',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const AddModulePage(),
+                          builder: (_) => const ListModulePage(),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     MySelectionButton(
                       minWidth: double.infinity,
-                      title: 'Pengaturan Materi',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddPartPage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    MySelectionButton(
-                      minWidth: double.infinity,
-                      title: 'Pengaturan Pertanyaan',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddQuestionPage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    MySelectionButton(
-                      minWidth: double.infinity,
-                      title: 'Pengaturan Pembelajaran',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddLessonPage(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    MySelectionButton(
-                      minWidth: double.infinity,
-                      title: 'Daftar Siswa',
+                      title: 'Siswa',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(

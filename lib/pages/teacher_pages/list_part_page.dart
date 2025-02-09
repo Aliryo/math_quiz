@@ -6,7 +6,9 @@ import '../index.dart';
 import '../widgets/index.dart';
 
 class ListPartPage extends StatefulWidget {
-  const ListPartPage({super.key});
+  const ListPartPage({super.key, required this.moduleName});
+
+  final String moduleName;
 
   @override
   State<ListPartPage> createState() => _ListPartPageState();
@@ -16,8 +18,8 @@ class _ListPartPageState extends State<ListPartPage> {
   bool _isLoading = true;
   List<PartMdl> _parts = [];
 
-  Future<void> _fetchAllParts() async {
-    final parts = await FirebaseHelper.fetchAllParts();
+  Future<void> _fetchParts() async {
+    final parts = await FirebaseHelper.fetchParts(widget.moduleName);
 
     setState(() {
       _parts = parts;
@@ -25,9 +27,24 @@ class _ListPartPageState extends State<ListPartPage> {
     });
   }
 
+  Future<void> _addPart() async {
+    final bool? result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddPartPage(
+          moduleName: widget.moduleName,
+        ),
+      ),
+    );
+
+    if (result ?? false) {
+      _fetchParts();
+    }
+  }
+
   @override
   void initState() {
-    _fetchAllParts();
+    _fetchParts();
     super.initState();
   }
 
@@ -38,15 +55,30 @@ class _ListPartPageState extends State<ListPartPage> {
     }
 
     if (_parts.isEmpty) {
-      return const MyEmpty(
+      return MyEmpty(
         title: 'Belum ada Materi yang ditambahkan.',
+        onTapTitle: 'Tambah Materi',
+        onTap: () => _addPart(),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daftar Materi'),
+        title: Text('Daftar Materi "${widget.moduleName}"'),
         centerTitle: true,
+      ),
+      floatingActionButton: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.deepPurple,
+        ),
+        child: IconButton(
+          onPressed: () => _addPart(),
+          icon: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -54,7 +86,7 @@ class _ListPartPageState extends State<ListPartPage> {
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/quiz.png',
+                'assets/quiz.png',
                 height: 320,
               ),
               const SizedBox(height: 40),
@@ -74,29 +106,68 @@ class _ListPartPageState extends State<ListPartPage> {
                           ),
                         ),
                         title: Text(part.partName),
-                        subtitle: Text(part.moduleName),
-                        onTap: () => Navigator.pushReplacement(
+                        onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AddPartPage(
-                              isEdit: true,
-                              partToEdit: part,
+                            builder: (_) => ListQuestionPage(
+                              moduleName: widget.moduleName,
+                              partName: part.partName,
                             ),
                           ),
                         ),
-                        trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () async {
-                              setState(() => _isLoading = true);
-                              await FirebaseHelper.deletePart(part.id);
-                              await _fetchAllParts();
-                            }),
+                        contentPadding: const EdgeInsets.only(left: 12),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.menu_book),
+                              color: Colors.deepPurple,
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AddLessonPage(
+                                    moduleName: widget.moduleName,
+                                    partName: part.partName,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.green,
+                              onPressed: () async {
+                                final bool? result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AddPartPage(
+                                      isEdit: true,
+                                      partToEdit: part,
+                                      moduleName: widget.moduleName,
+                                    ),
+                                  ),
+                                );
+
+                                if (result ?? false) {
+                                  _fetchParts();
+                                }
+                              },
+                            ),
+                            IconButton(
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
+                                onPressed: () async {
+                                  setState(() => _isLoading = true);
+                                  await FirebaseHelper.deletePart(part.id);
+                                  await _fetchParts();
+                                }),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
               ),
+              const SizedBox(height: 80),
             ],
           ),
         ),

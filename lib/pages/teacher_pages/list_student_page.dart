@@ -25,6 +25,60 @@ class _ListStudentPageState extends State<ListStudentPage> {
     });
   }
 
+  void _editStudent(StudentsMdl student) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                MyInputField(
+                  initialValue: student.kidName,
+                  label: 'Masukkan Nama Baru',
+                  onChanged: (text) {
+                    setState(() => _newKidnName = text);
+                  },
+                ),
+                const SizedBox(height: 12),
+                MySelectionButton(
+                  title: 'Ubah Nama Siswa',
+                  onTap: () async {
+                    if (_newKidnName.isNotEmpty || _newKidnName.length < 3) {
+                      setState(() => _isLoading = true);
+                      await FirebaseHelper.editStudent(
+                          student.id, _newKidnName);
+                      await _fetchStudents();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        MySnackbar.success(context,
+                            message: 'Siswa berhasil diubah.');
+                      }
+                    } else {
+                      Navigator.pop(context);
+                      MySnackbar.failed(
+                        context,
+                        message: 'Nama siswa tidak valid.',
+                      );
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     _fetchStudents();
@@ -53,7 +107,7 @@ class _ListStudentPageState extends State<ListStudentPage> {
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/quiz.png',
+                'assets/quiz.png',
                 height: 320,
               ),
               const SizedBox(height: 40),
@@ -73,71 +127,25 @@ class _ListStudentPageState extends State<ListStudentPage> {
                           ),
                         ),
                         title: Text(student.kidName),
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  left: 16,
-                                  right: 16,
-                                  top: 16,
-                                  bottom:
-                                      MediaQuery.of(context).viewInsets.bottom +
-                                          16,
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      MyInputField(
-                                        label: 'Masukkan Nama Baru',
-                                        onChanged: (text) {
-                                          setState(() => _newKidnName = text);
-                                        },
-                                      ),
-                                      const SizedBox(height: 12),
-                                      MySelectionButton(
-                                        title: 'Ubah Nama Siswa',
-                                        onTap: () async {
-                                          if (_newKidnName.isNotEmpty ||
-                                              _newKidnName.length < 3) {
-                                            setState(() => _isLoading = true);
-                                            await FirebaseHelper.editStudent(
-                                                student.id, _newKidnName);
-                                            await _fetchStudents();
-                                            if (context.mounted) {
-                                              Navigator.pop(context);
-                                              MySnackbar.success(context,
-                                                  message:
-                                                      'Siswa berhasil diubah.');
-                                            }
-                                          } else {
-                                            Navigator.pop(context);
-                                            MySnackbar.failed(
-                                              context,
-                                              message:
-                                                  'Nama siswa tidak valid.',
-                                            );
-                                          }
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () async {
-                              setState(() => _isLoading = true);
-                              await FirebaseHelper.deleteStudent(student.id);
-                              await _fetchStudents();
-                            }),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.green,
+                              onPressed: () => _editStudent(student),
+                            ),
+                            IconButton(
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
+                                onPressed: () async {
+                                  setState(() => _isLoading = true);
+                                  await FirebaseHelper.deleteStudent(
+                                      student.id);
+                                  await _fetchStudents();
+                                }),
+                          ],
+                        ),
                       ),
                     );
                   },

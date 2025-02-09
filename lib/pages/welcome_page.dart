@@ -1,8 +1,24 @@
+import 'dart:developer';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:math_quiz/pages/index.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,37 +41,53 @@ class WelcomePage extends StatelessWidget {
                 ),
               ),
               Image.asset(
-                'lib/assets/menu.png',
+                'assets/menu.png',
                 width: double.infinity,
                 height: 400,
               ),
               const SizedBox(height: 40),
               _WidgetGameButton(
-                onPressed: () => Future.delayed(const Duration(seconds: 1), () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ModulePage(
-                        kidName: '',
-                        isStartQuiz: false,
+                icon: Icons.menu_book,
+                onPressed: () async {
+                  try {
+                    await _audioPlayer.play(AssetSource('play_click.mp3'));
+                  } catch (e) {
+                    log('Error playing sound: $e');
+                  }
+                  Future.delayed(const Duration(seconds: 1), () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ModulePage(
+                          kidName: 'Guru',
+                          isStartQuiz: false,
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  });
+                },
                 label: 'Lihat Pembelajaran',
               ),
               const SizedBox(height: 20),
               _WidgetGameButton(
-                onPressed: () => Future.delayed(const Duration(seconds: 1), () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ModulePage(
-                        kidName: '',
+                onPressed: () async {
+                  try {
+                    await _audioPlayer.play(AssetSource('play_click.mp3'));
+                  } catch (e) {
+                    log('Error playing sound: $e');
+                  }
+
+                  Future.delayed(const Duration(seconds: 1), () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ModulePage(
+                          kidName: '',
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  });
+                },
                 label: 'Lihat Hasil Kuis',
               ),
             ],
@@ -184,8 +216,13 @@ class _WidgetTextFieldState extends State<_WidgetTextField>
 class _WidgetGameButton extends StatefulWidget {
   final String label;
   final VoidCallback onPressed;
+  final IconData? icon;
 
-  const _WidgetGameButton({required this.label, required this.onPressed});
+  const _WidgetGameButton({
+    required this.label,
+    required this.onPressed,
+    this.icon,
+  });
 
   @override
   State<_WidgetGameButton> createState() => _WidgetGameButtonState();
@@ -235,7 +272,11 @@ class _WidgetGameButtonState extends State<_WidgetGameButton>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.play_arrow, size: 28, color: Colors.white),
+            Icon(
+              widget.icon ?? Icons.play_arrow,
+              size: 28,
+              color: Colors.white,
+            ),
             const SizedBox(width: 10),
             Text(
               widget.label,

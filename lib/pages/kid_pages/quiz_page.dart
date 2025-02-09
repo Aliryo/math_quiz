@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
@@ -9,8 +10,6 @@ import 'package:math_quiz/pages/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
 class QuizPage extends StatefulWidget {
-  // TODO(Aliryo): shuffle answer index
-
   const QuizPage({super.key, required this.kidName, required this.partName});
   final String kidName;
   final String partName;
@@ -20,6 +19,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isLoading = true;
 
   //? Parameter Untuk Kuis
@@ -43,6 +43,7 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -55,7 +56,9 @@ class _QuizPageState extends State<QuizPage> {
     setState(() {
       _questions = questions.take(_maxQuestionsToShow).toList();
       _isLoading = false;
+
       _startTimer();
+      _playSound();
     });
   }
 
@@ -72,6 +75,12 @@ class _QuizPageState extends State<QuizPage> {
         }
       });
     });
+  }
+
+  Future<void> _playSound() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.play(AssetSource('quiz_audio.mp3'));
+    //_audioPlayer.onPlayerComplete.listen((_) => _playSound());
   }
 
   void _addScore(String answer) {
@@ -211,14 +220,14 @@ class _ViewBackground extends StatelessWidget {
           bottom: -300,
           left: -10,
           right: -10,
-          child: Lottie.asset('lib/assets/bubble.json'),
+          child: Lottie.asset('assets/bubble.json'),
         ),
         Positioned(
           bottom: 30,
           left: 0,
           right: 0,
           child: Image.asset(
-            'lib/assets/quiz.png',
+            'assets/quiz.png',
             height: 180,
           ),
         ),
@@ -394,10 +403,14 @@ class _WidgetGridAnswer extends StatelessWidget {
         itemCount: options.length,
         itemBuilder: (context, index) {
           return _WidgetAnswer(
-            answer: options[index],
-            label: labels[index],
-            onTap: () => onOptionSelected(labels[index]),
-          );
+              answer: options[index],
+              label: labels[index],
+              onTap: () {
+                AudioPlayer().play(AssetSource('quiz_click.mp3'));
+                Future.delayed(const Duration(seconds: 3), () {
+                  onOptionSelected(labels[index]);
+                });
+              });
         },
         separatorBuilder: (_, __) => const SizedBox(height: 8),
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:math_quiz/models/index.dart';
 
 import '../../helpers/index.dart';
-import '../index.dart';
 import '../widgets/index.dart';
 
 class AddModulePage extends StatefulWidget {
@@ -34,7 +33,7 @@ class _AddModulePageState extends State<AddModulePage> {
       await FirebaseHelper.addModule(module);
 
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
         MySnackbar.success(context, message: 'Modul berhasil ditambahkan.');
       }
       setState(() => _isLoading = false);
@@ -75,16 +74,6 @@ class _AddModulePageState extends State<AddModulePage> {
               MySelectionButton(
                 title: 'Tambah Modul',
                 onTap: _submitModule,
-              ),
-              const SizedBox(height: 20),
-              MySelectionButton(
-                title: 'Daftar Modul',
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ListModulePage(),
-                  ),
-                ),
               ),
             ],
           ),

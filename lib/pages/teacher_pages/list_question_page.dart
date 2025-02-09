@@ -6,7 +6,13 @@ import '../../helpers/index.dart';
 import '../widgets/index.dart';
 
 class ListQuestionPage extends StatefulWidget {
-  const ListQuestionPage({super.key});
+  const ListQuestionPage({
+    super.key,
+    required this.partName,
+    required this.moduleName,
+  });
+  final String moduleName;
+  final String partName;
 
   @override
   State<ListQuestionPage> createState() => _ListQuestionPageState();
@@ -17,12 +23,28 @@ class _ListQuestionPageState extends State<ListQuestionPage> {
   List<QuestionMdl> _questions = [];
 
   Future<void> _fetchAllQuestion() async {
-    final questions = await FirebaseHelper.fetchAllQuestions();
+    final questions = await FirebaseHelper.fetchQuestions(widget.partName);
 
     setState(() {
       _questions = questions;
       _isLoading = false;
     });
+  }
+
+  Future<void> _addQuestion() async {
+    final bool? result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddQuestionPage(
+          moduleName: widget.moduleName,
+          partName: widget.partName,
+        ),
+      ),
+    );
+
+    if (result ?? false) {
+      _fetchAllQuestion();
+    }
   }
 
   @override
@@ -38,8 +60,18 @@ class _ListQuestionPageState extends State<ListQuestionPage> {
     }
 
     if (_questions.isEmpty) {
-      return const MyEmpty(
+      return MyEmpty(
         title: 'Belum ada Pertanyaan yang ditambahkan.',
+        onTapTitle: 'Tambah Soal',
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddQuestionPage(
+              moduleName: widget.moduleName,
+              partName: widget.partName,
+            ),
+          ),
+        ),
       );
     }
 
@@ -48,13 +80,26 @@ class _ListQuestionPageState extends State<ListQuestionPage> {
         title: const Text('Daftar Pertanyaan'),
         centerTitle: true,
       ),
+      floatingActionButton: Container(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.deepPurple,
+        ),
+        child: IconButton(
+          onPressed: () => _addQuestion(),
+          icon: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/quiz.png',
+                'assets/quiz.png',
                 height: 320,
               ),
               const SizedBox(height: 40),
@@ -97,28 +142,48 @@ class _ListQuestionPageState extends State<ListQuestionPage> {
                         ),
                         subtitle: Text(
                             'Modul: ${question.moduleName}\nMateri: ${question.partName}'),
-                        onTap: () => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AddQuestionPage(
-                              isEdit: true,
-                              questionToEdit: question,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.green,
+                              onPressed: () async {
+                                final bool? result =
+                                    await Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AddQuestionPage(
+                                      isEdit: true,
+                                      questionToEdit: question,
+                                      moduleName: widget.moduleName,
+                                      partName: widget.partName,
+                                    ),
+                                  ),
+                                );
+
+                                if (result ?? false) {
+                                  _fetchAllQuestion();
+                                }
+                              },
                             ),
-                          ),
+                            IconButton(
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
+                                onPressed: () async {
+                                  setState(() => _isLoading = true);
+                                  await FirebaseHelper.deleteQuestion(
+                                      question.id);
+                                  await _fetchAllQuestion();
+                                }),
+                          ],
                         ),
-                        trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () async {
-                              setState(() => _isLoading = true);
-                              await FirebaseHelper.deleteQuestion(question.id);
-                              await _fetchAllQuestion();
-                            }),
                       ),
                     );
                   },
                 ),
-              )
+              ),
+              const SizedBox(height: 80),
             ],
           ),
         ),

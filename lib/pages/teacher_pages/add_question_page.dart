@@ -5,14 +5,16 @@ import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
-import '../index.dart';
-
 class AddQuestionPage extends StatefulWidget {
   const AddQuestionPage({
     super.key,
+    required this.moduleName,
+    required this.partName,
     this.questionToEdit,
     this.isEdit = false,
   });
+  final String moduleName;
+  final String partName;
   final QuestionMdl? questionToEdit;
   final bool isEdit;
 
@@ -22,18 +24,14 @@ class AddQuestionPage extends StatefulWidget {
 
 class _AddQuestionPageState extends State<AddQuestionPage> {
   List<String> _options = ['', '', '', ''];
-  List<ModuleMdl> _modules = [];
-  List<PartMdl> _parts = [];
 
-  String? _selectedModuleName;
-  String? _selectedPartName;
   String? _questionText;
   String? _correctAnswer;
   String? _imageUrl;
 
   File? _selectedFile;
 
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   Future<void> _selectImage() async {
     final File? file = await CommonHelper.pickFile(
@@ -48,8 +46,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
   Future<void> _uploadImage() async {
     //? Validasi Semua Harus Diisi
-    if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_questionText == null || _questionText!.isEmpty) &&
+    if ((_questionText == null || _questionText!.isEmpty) &&
             (_selectedFile == null && _imageUrl!.isEmpty) ||
         _correctAnswer == null ||
         !_options.every((option) => option.isNotEmpty)) {
@@ -87,8 +84,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
   Future<void> _submitQuestion() async {
     //? Validasi Semua Harus Diisi
-    if ((_selectedModuleName == null || _selectedPartName == null) ||
-        (_questionText == null || _questionText!.isEmpty) &&
+    if ((_questionText == null || _questionText!.isEmpty) &&
             (_selectedFile == null && _imageUrl!.isEmpty) ||
         _correctAnswer == null ||
         !_options.every((option) => option.isNotEmpty)) {
@@ -107,8 +103,8 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
         imageUrl: _imageUrl ?? '',
         questionText: _questionText ?? '',
         correctAnswer: _correctAnswer ?? '',
-        partName: _selectedPartName ?? '',
-        moduleName: _selectedModuleName ?? '',
+        partName: widget.partName,
+        moduleName: widget.moduleName,
         options: _options,
       );
 
@@ -143,24 +139,6 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
     }
   }
 
-  Future<void> _fetchModules() async {
-    final modules = await FirebaseHelper.fetchModules();
-
-    setState(() {
-      _modules = modules;
-      _isLoading = false;
-    });
-  }
-
-  Future<void> _fetchParts(String moduleName) async {
-    final parts = await FirebaseHelper.fetchParts(moduleName);
-
-    setState(() {
-      _parts = parts;
-      _isLoading = false;
-    });
-  }
-
   @override
   void initState() {
     if (widget.isEdit && widget.questionToEdit != null) {
@@ -168,13 +146,7 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
       _imageUrl = widget.questionToEdit!.imageUrl;
       _questionText = widget.questionToEdit!.questionText;
       _options = widget.questionToEdit!.options;
-      _selectedModuleName = widget.questionToEdit!.moduleName;
-      _selectedPartName = widget.questionToEdit!.partName;
-
-      _fetchParts(widget.questionToEdit!.moduleName);
     }
-
-    _fetchModules();
     super.initState();
   }
 
@@ -184,10 +156,6 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
 
     if (_isLoading) {
       return const MyLoading();
-    }
-
-    if (_modules.isEmpty) {
-      return const MyEmpty(title: 'Belum ada modul yang ditambahkan.');
     }
 
     return Scaffold(
@@ -245,46 +213,6 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
             ] else ...[
               const SizedBox(),
             ],
-            MyDropdown<String>(
-              label: 'Pilih Modul',
-              value: _selectedModuleName,
-              items: _modules.map((ModuleMdl module) {
-                return DropdownMenuItem<String>(
-                  value: module.moduleName,
-                  child: Text(module.moduleName),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedModuleName = newValue;
-                  _parts = [];
-                  _selectedPartName = null;
-                  _isLoading = true;
-                });
-
-                _fetchParts(newValue ?? '');
-              },
-            ),
-            const SizedBox(height: 20),
-            MyDropdown<String>(
-              label: 'Pilih Materi',
-              value: _selectedPartName,
-              items: _parts.isEmpty
-                  ? [
-                      const DropdownMenuItem(
-                        child: Text('Pilih Modul Dulu'),
-                      )
-                    ]
-                  : _parts.map((PartMdl parts) {
-                      return DropdownMenuItem<String>(
-                        value: parts.partName,
-                        child: Text(parts.partName),
-                      );
-                    }).toList(),
-              onChanged: (String? newValue) {
-                setState(() => _selectedPartName = newValue);
-              },
-            ),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: _selectImage,
@@ -350,16 +278,6 @@ class _AddQuestionPageState extends State<AddQuestionPage> {
             MySelectionButton(
               onTap: _selectedFile != null ? _uploadImage : _submitQuestion,
               title: widget.isEdit ? 'Ubah Pertanyaan' : 'Tambah Pertanyaan',
-            ),
-            const SizedBox(height: 20),
-            MySelectionButton(
-              onTap: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ListQuestionPage(),
-                ),
-              ),
-              title: 'Daftar Pertanyaan',
             ),
           ],
         ),
