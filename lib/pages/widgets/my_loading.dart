@@ -9,7 +9,7 @@ class MyLoading extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Lottie.asset(
-          'lib/assets/loading.json',
+          'assets/loading.json',
         ),
       ),
     );

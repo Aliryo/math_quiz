@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:math_quiz/pages/index.dart';
 
+import '../helpers/index.dart';
+
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -9,17 +11,39 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  bool _hasUsername = false;
+
+  Future<void> _checkUsername() async {
+    final hasUsername = await LocalDataHelper.checkUsername();
+    setState(() => _hasUsername = hasUsername);
+  }
+
   @override
   void initState() {
-    Future.delayed(
-      const Duration(seconds: 2),
-      () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const WelcomePage(),
-        ),
-      ),
-    );
+    Future.microtask(() async {
+      await _checkUsername();
+      Future.delayed(
+        const Duration(seconds: 2),
+        () {
+          if (_hasUsername) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const WelcomePage(),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const UsernamePage(),
+              ),
+            );
+          }
+        },
+      );
+    });
+
     super.initState();
   }
 
@@ -28,7 +52,7 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       body: Center(
         child: Image.asset(
-          'lib/assets/splash.jpg',
+          'assets/splash.jpg',
           width: double.infinity,
           height: double.infinity,
           fit: BoxFit.fill,

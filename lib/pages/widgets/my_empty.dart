@@ -8,10 +8,10 @@ class MyEmpty extends StatelessWidget {
   const MyEmpty({
     super.key,
     required this.title,
-    this.isBackFromScorePage = false,
+    this.isBackFromQuizPage = false,
   });
   final String title;
-  final bool isBackFromScorePage;
+  final bool isBackFromQuizPage;
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +21,12 @@ class MyEmpty extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'lib/assets/setting.png',
+              'assets/setting.png',
               height: 400,
             ),
             Text(
               title,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -38,7 +39,7 @@ class MyEmpty extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         child: MySelectionButton(
           title: 'Kembali',
-          onTap: () => isBackFromScorePage
+          onTap: () => isBackFromQuizPage
               ? Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (_) => const WelcomePage(),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
@@ -18,6 +19,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isLoading = true;
 
   //? Parameter Untuk Kuis
@@ -41,6 +43,7 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -53,7 +56,9 @@ class _QuizPageState extends State<QuizPage> {
     setState(() {
       _questions = questions.take(_maxQuestionsToShow).toList();
       _isLoading = false;
+
       _startTimer();
+      _playSound();
     });
   }
 
@@ -70,6 +75,11 @@ class _QuizPageState extends State<QuizPage> {
         }
       });
     });
+  }
+
+  Future<void> _playSound() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.play(AssetSource('quiz_audio.mp3'));
   }
 
   void _addScore(String answer) {
@@ -128,7 +138,10 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     if (_questions.length < _maxQuestionsToShow) {
-      return const MyEmpty(title: 'Belum ada pertanyaan.');
+      return const MyEmpty(
+        title: 'Belum ada pertanyaan.',
+        isBackFromQuizPage: true,
+      );
     }
 
     return _ViewQuiz(
@@ -209,14 +222,14 @@ class _ViewBackground extends StatelessWidget {
           bottom: -300,
           left: -10,
           right: -10,
-          child: Lottie.asset('lib/assets/bubble.json'),
+          child: Lottie.asset('assets/bubble.json'),
         ),
         Positioned(
           bottom: 30,
           left: 0,
           right: 0,
           child: Image.asset(
-            'lib/assets/quiz.png',
+            'assets/quiz.png',
             height: 180,
           ),
         ),
@@ -247,230 +260,20 @@ class _ViewForeground extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Column(
           children: [
-            _WidgetLinearProgress(progressValue: progressValue),
+            WidgetLinearProgress(progressValue: progressValue),
             const SizedBox(height: 20),
-            _WidgetTimer(
+            WidgetTimer(
               remainingTime: remainingTime,
               currentQuestionIndex: currentQuestionIndex,
             ),
             const SizedBox(height: 40),
-            _WidgetQuestion(question: question),
+            WidgetQuestion(question: question),
             const SizedBox(height: 40),
-            _WidgetGridAnswer(
+            WidgetGridAnswer(
               options: question.options,
               onOptionSelected: onAnswerSelected,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WidgetLinearProgress extends StatelessWidget {
-  const _WidgetLinearProgress({required this.progressValue});
-
-  final double progressValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: const AlwaysStoppedAnimation(1.0),
-      child: LinearProgressIndicator(
-        borderRadius: BorderRadius.circular(6),
-        value: progressValue,
-        minHeight: 8,
-        backgroundColor: Colors.deepPurple[100],
-        valueColor: AlwaysStoppedAnimation<Color?>(Colors.purpleAccent[100]),
-      ),
-    );
-  }
-}
-
-class _WidgetTimer extends StatelessWidget {
-  const _WidgetTimer({
-    required this.remainingTime,
-    required this.currentQuestionIndex,
-  });
-
-  final int remainingTime;
-  final int currentQuestionIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.deepPurple,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.timer,
-                color: Colors.purpleAccent[100],
-              ),
-              const SizedBox(width: 5),
-              Text(
-                CommonHelper.formatTimer(remainingTime),
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purpleAccent[100],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Text(
-          '${currentQuestionIndex + 1}/10',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.purpleAccent[100],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _WidgetQuestion extends StatelessWidget {
-  const _WidgetQuestion({required this.question});
-
-  final QuestionMdl question;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: Image.network(
-        question.imageUrl,
-        fit: BoxFit.fill,
-        height: MediaQuery.of(context).size.width / 2,
-        errorBuilder: (_, __, ___) => Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-          alignment: Alignment.center,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            question.questionText,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WidgetGridAnswer extends StatelessWidget {
-  const _WidgetGridAnswer({
-    required this.options,
-    required this.onOptionSelected,
-  });
-
-  final List<String> options;
-  final ValueChanged<String> onOptionSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    const labels = ['A', 'B', 'C', 'D'];
-
-    return SizedBox(
-      height: MediaQuery.of(context).size.height / 2,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: options.length,
-        itemBuilder: (context, index) {
-          return _WidgetAnswer(
-            answer: options[index],
-            label: labels[index],
-            onTap: () => onOptionSelected(labels[index]),
-          );
-        },
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-      ),
-    );
-  }
-}
-
-class _WidgetAnswer extends StatefulWidget {
-  const _WidgetAnswer({
-    required this.answer,
-    required this.onTap,
-    required this.label,
-  });
-
-  final String answer;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_WidgetAnswer> createState() => _WidgetAnswerState();
-}
-
-class _WidgetAnswerState extends State<_WidgetAnswer>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTap() {
-    _controller.forward().then((_) {
-      _controller.reverse();
-      widget.onTap();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Card(
-          elevation: 8,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          color: Colors.deepPurpleAccent[100]?.withOpacity(0.4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            child: Text(
-              '${widget.label}. ${widget.answer}',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Futura',
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
         ),
       ),
     );

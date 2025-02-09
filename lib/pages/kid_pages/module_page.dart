@@ -57,7 +57,7 @@ class _ModulePageState extends State<ModulePage> {
           child: Column(
             children: [
               Image.asset(
-                'lib/assets/math.png',
+                'assets/math.png',
                 height: 320,
               ),
               const SizedBox(height: 40),

@@ -1,12 +1,31 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:math_quiz/pages/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
-class ScorePage extends StatelessWidget {
+class ScorePage extends StatefulWidget {
   const ScorePage({super.key, required this.score, required this.kidName});
   final int score;
   final String kidName;
+
+  @override
+  State<ScorePage> createState() => _ScorePageState();
+}
+
+class _ScorePageState extends State<ScorePage> {
+  final _audioPlayer = AudioPlayer();
+  @override
+  void initState() {
+    _audioPlayer.play(AssetSource('quiz_finish.mp3'));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +37,7 @@ class ScorePage extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Image.asset('lib/assets/score.png'),
+              Image.asset('assets/score.png'),
               IntrinsicHeight(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -32,7 +51,7 @@ class ScorePage extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          'Halo $kidName,\nScore Kamu "$score"',
+                          'Halo ${widget.kidName},\nScore Kamu "${widget.score}"',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 30,
@@ -41,7 +60,7 @@ class ScorePage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '\n"${_getScoreMessage(score)}"',
+                          '\n"${_getScoreMessage(widget.score)}"',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 18,
