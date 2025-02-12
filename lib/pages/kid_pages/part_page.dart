@@ -101,7 +101,9 @@ class _PartPageState extends State<PartPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pilih Kuis Pembelajaran ${widget.moduleName}',
+          widget.isStartQuiz
+              ? 'Pilih Kuis Pembelajaran ${widget.moduleName}'
+              : 'Pilih Materi Pembelajaran ${widget.moduleName}',
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 16),
         ),
