@@ -83,9 +83,34 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _addScore(String answer) {
-    if (_questions[_currentQuestionIndex].correctAnswer == answer) {
+    bool isCorrect = _questions[_currentQuestionIndex].correctAnswer == answer;
+
+    if (isCorrect) {
       setState(() => _score += 10);
     }
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          Future.delayed(const Duration(milliseconds: 400), () {
+            Navigator.of(context, rootNavigator: true).pop();
+          });
+
+          return AlertDialog(
+            contentPadding: const EdgeInsets.all(12),
+            insetPadding: EdgeInsets.zero,
+            backgroundColor: Colors.deepPurple.withOpacity(0.8),
+            content: Text(
+              isCorrect ? 'Benar!' : 'Salah!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isCorrect ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          );
+        });
   }
 
   Future<void> _handleAnswer(String answer) async {
@@ -113,6 +138,8 @@ class _QuizPageState extends State<QuizPage> {
     );
 
     await FirebaseHelper.addResult(result);
+
+    await Future.delayed(const Duration(milliseconds: 800));
 
     _navigateToScorePage();
     setState(() => _isLoading = false);
@@ -150,6 +177,7 @@ class _QuizPageState extends State<QuizPage> {
       progressValue: _progressValue,
       remainingTime: _remainingTime,
       currentQuestionIndex: _currentQuestionIndex,
+      score: _score,
     );
   }
 }
@@ -161,6 +189,7 @@ class _ViewQuiz extends StatelessWidget {
     required this.progressValue,
     required this.remainingTime,
     required this.currentQuestionIndex,
+    required this.score,
   });
 
   final QuestionMdl question;
@@ -168,6 +197,7 @@ class _ViewQuiz extends StatelessWidget {
   final double progressValue;
   final int remainingTime;
   final int currentQuestionIndex;
+  final int score;
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +219,7 @@ class _ViewQuiz extends StatelessWidget {
                 question: question,
                 onAnswerSelected: onAnswerSelected,
                 currentQuestionIndex: currentQuestionIndex,
+                score: score,
               ),
             ],
           ),
@@ -245,6 +276,7 @@ class _ViewForeground extends StatelessWidget {
     required this.question,
     required this.onAnswerSelected,
     required this.currentQuestionIndex,
+    required this.score,
   });
 
   final double progressValue;
@@ -252,6 +284,7 @@ class _ViewForeground extends StatelessWidget {
   final QuestionMdl question;
   final ValueChanged<String> onAnswerSelected;
   final int currentQuestionIndex;
+  final int score;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +300,7 @@ class _ViewForeground extends StatelessWidget {
               currentQuestionIndex: currentQuestionIndex,
             ),
             const SizedBox(height: 40),
-            WidgetQuestion(question: question),
+            WidgetQuestion(question: question, score: score),
             const SizedBox(height: 40),
             WidgetGridAnswer(
               options: question.options,
