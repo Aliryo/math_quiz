@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../index.dart';
-
 import 'index.dart';
 
 class MyEmpty extends StatelessWidget {
@@ -13,36 +11,39 @@ class MyEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/setting.png',
-              height: 400,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/setting.png',
+                  height: 400,
+                ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
         child: MySelectionButton(
-          title: onTapTitle ?? 'Kembali',
-          onTap: onTap ??
-              () => Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (_) => const WelcomePage(),
-                    ),
-                    (_) => false,
-                  ),
-        ),
+            title: onTapTitle ?? 'Kembali',
+            onTap: onTap ?? () => Navigator.of(context).pop()),
       ),
     );
   }

@@ -273,7 +273,7 @@ class _WidgetGameButtonState extends State<_WidgetGameButton>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              widget.icon ?? Icons.play_arrow,
+              widget.icon ?? Icons.format_list_numbered_sharp,
               size: 28,
               color: Colors.white,
             ),

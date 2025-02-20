@@ -120,6 +120,19 @@ class _ListPartPageState extends State<ListPartPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
+                              icon: const Icon(Icons.play_circle),
+                              color: Colors.deepPurple,
+                              onPressed: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => QuizPage(
+                                    kidName: 'Guru',
+                                    partName: part.partName,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
                               icon: const Icon(Icons.menu_book),
                               color: Colors.deepPurple,
                               onPressed: () => Navigator.push(

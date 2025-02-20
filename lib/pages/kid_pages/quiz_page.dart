@@ -139,7 +139,15 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     if (_questions.length < _maxQuestionsToShow) {
-      return const MyEmpty(title: 'Belum ada pertanyaan.');
+      return MyEmpty(
+        title: 'Belum ada pertanyaan.',
+        onTap: () => Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => const WelcomePage(),
+          ),
+          (_) => false,
+        ),
+      );
     }
 
     return _ViewQuiz(
@@ -405,12 +413,7 @@ class _WidgetGridAnswer extends StatelessWidget {
           return _WidgetAnswer(
               answer: options[index],
               label: labels[index],
-              onTap: () {
-                AudioPlayer().play(AssetSource('quiz_click.mp3'));
-                Future.delayed(const Duration(seconds: 3), () {
-                  onOptionSelected(labels[index]);
-                });
-              });
+              onTap: () => onOptionSelected(labels[index]));
         },
         separatorBuilder: (_, __) => const SizedBox(height: 8),
       ),

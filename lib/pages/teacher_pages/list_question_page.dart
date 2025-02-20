@@ -149,8 +149,7 @@ class _ListQuestionPageState extends State<ListQuestionPage> {
                               icon: const Icon(Icons.edit),
                               color: Colors.green,
                               onPressed: () async {
-                                final bool? result =
-                                    await Navigator.pushReplacement(
+                                final bool? result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => AddQuestionPage(
