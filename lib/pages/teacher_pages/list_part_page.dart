@@ -106,27 +106,19 @@ class _ListPartPageState extends State<ListPartPage> {
                           ),
                         ),
                         title: Text(part.partName),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ListQuestionPage(
-                              moduleName: widget.moduleName,
-                              partName: part.partName,
-                            ),
-                          ),
-                        ),
+                        onTap: () {},
                         contentPadding: const EdgeInsets.only(left: 12),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.play_circle),
+                              icon: const Icon(Icons.list_alt_outlined),
                               color: Colors.deepPurple,
-                              onPressed: () => Navigator.pushReplacement(
+                              onPressed: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => QuizPage(
-                                    kidName: 'Guru',
+                                  builder: (_) => ListQuestionPage(
+                                    moduleName: widget.moduleName,
                                     partName: part.partName,
                                   ),
                                 ),
