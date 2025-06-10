@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_quiz/models/student_mdl.dart';
 import 'package:math_quiz/pages/index.dart';
 import 'package:math_quiz/pages/widgets/index.dart';
 
@@ -12,21 +13,25 @@ class UsernamePage extends StatefulWidget {
 }
 
 class _UsernamePageState extends State<UsernamePage> {
-  final _controller = TextEditingController();
-  bool _isError = false;
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isRegister = false;
 
-  Future<void> _saveUsername() async {
-    if (_controller.text.length < 3) {
-      setState(() => _isError = true);
+  Future<void> _loginUsername() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      MySnackbar.failed(context, message: 'Data harus diisi semua');
       return;
     }
 
-    setState(() => _isError = false);
-
     try {
       await Future.wait([
-        LocalDataHelper.saveUsername(_controller.text),
-        FirebaseHelper.addKidName(_controller.text),
+        FirebaseHelper.loginStudent(
+          email: _emailController.text,
+          password: _passwordController.text,
+        ).then(
+          (result) => LocalDataHelper.saveUsername(result.kidName),
+        ),
       ]);
 
       if (mounted) {
@@ -40,9 +45,43 @@ class _UsernamePageState extends State<UsernamePage> {
     } catch (e) {
       if (mounted) {
         MySnackbar.failed(context,
-            message: 'Gagal menyimpan, coba beberapa saat lagi');
+            message: 'Gagal masuk, periksa email dan password');
       }
-      setState(() => _isError = true);
+    }
+  }
+
+  Future<void> _saveUsername() async {
+    if (_usernameController.text.length < 3 ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      MySnackbar.failed(context, message: 'Data harus diisi semua');
+      return;
+    }
+
+    try {
+      await Future.wait([
+        FirebaseHelper.createStudent(StudentMdl(
+          kidName: _usernameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
+        )).then(
+          (_) => LocalDataHelper.saveUsername(_usernameController.text),
+        ),
+      ]);
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const WelcomePage(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        MySnackbar.failed(context,
+            message: 'Gagal menyimpan, siswa sudah terdaftar');
+      }
     }
   }
 
@@ -58,17 +97,41 @@ class _UsernamePageState extends State<UsernamePage> {
               width: double.infinity,
               height: 400,
             ),
-            const SizedBox(height: 40),
+            if (_isRegister)
+              _WidgetTextField(
+                label: 'Nama Lengkap',
+                hintText: 'Masukkan Nama Lengkap Kamu',
+                controller: _usernameController,
+              ),
             _WidgetTextField(
-              label: 'Nama Lengkap',
-              hintText: 'Masukkan Nama Lengkap Kamu',
-              controller: _controller,
-              isError: _isError,
+              label: 'Email',
+              hintText: 'Masukkan Email Kamu',
+              controller: _emailController,
+            ),
+            _WidgetTextField(
+              label: 'Password',
+              hintText: 'Masukkan Password Kamu',
+              controller: _passwordController,
+              isPassword: true,
             ),
             const SizedBox(height: 20),
             MySelectionButton(
-              title: 'Simpan Nama',
-              onTap: _saveUsername,
+              title: _isRegister ? 'Daftar' : 'Masuk',
+              onTap: _isRegister ? _saveUsername : _loginUsername,
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isRegister = !_isRegister;
+                  _usernameController.clear();
+                  _emailController.clear();
+                  _passwordController.clear();
+                });
+              },
+              child: Text(_isRegister
+                  ? 'Sudah Punya Akun? Masuk'
+                  : 'Belum Punya Akun? Daftar'),
             ),
           ],
         ),
@@ -81,13 +144,13 @@ class _WidgetTextField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
   final String hintText;
-  final bool isError;
+  final bool isPassword;
 
   const _WidgetTextField({
     required this.label,
     required this.controller,
     required this.hintText,
-    required this.isError,
+    this.isPassword = false,
   });
 
   @override
@@ -148,6 +211,7 @@ class _WidgetTextFieldState extends State<_WidgetTextField>
             return Transform.translate(
               offset: Offset(_isValid ? 0 : _shakeAnimation.value, 0),
               child: TextField(
+                obscureText: widget.isPassword,
                 style: const TextStyle(
                   color: Colors.deepPurple,
                   fontWeight: FontWeight.w500,
@@ -181,12 +245,7 @@ class _WidgetTextFieldState extends State<_WidgetTextField>
             );
           },
         ),
-        const SizedBox(height: 10),
-        if (!_isValid || widget.isError)
-          const Text(
-            'Oops! Kamu harus isi nama dulu.',
-            style: TextStyle(color: Colors.redAccent),
-          ),
+        const SizedBox(height: 8),
       ],
     );
   }

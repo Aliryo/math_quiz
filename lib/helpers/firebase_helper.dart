@@ -1,18 +1,68 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:math_quiz/helpers/index.dart';
 import 'package:math_quiz/models/index.dart';
+import 'package:math_quiz/models/student_mdl.dart';
 
 class FirebaseHelper {
   FirebaseHelper._();
 
+  //? Membuat Akun Siswa Baru Ke Firebase
+  static Future<void> createStudent(StudentMdl student) async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: student.email,
+        password: student.password,
+      );
+
+      _addKidName(StudentMdl(
+        id: userCredential.user?.uid ?? '',
+        kidName: student.kidName,
+        email: student.email,
+        password: student.password,
+      ));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<StudentMdl> loginStudent({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(userCredential.user?.uid)
+              .get();
+
+      if (docSnapshot.reference.id.isNotEmpty) {
+        return StudentMdl.fromMap(docSnapshot.data()!, docSnapshot.id);
+      } else {
+        throw Exception();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   //? Menambah Nama Siswa Ke Firebase
-  static Future<void> addKidName(String kidName) async {
+  static Future<void> _addKidName(StudentMdl student) async {
     await FirebaseFirestore.instance
         .collection('students')
-        .add({'kidName': kidName});
+        .doc(student.id)
+        .set(student.toMap());
   }
 
   //? Menambah Pertanyaan Kuis Ke Firebase
