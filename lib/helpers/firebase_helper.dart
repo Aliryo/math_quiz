@@ -183,9 +183,25 @@ class FirebaseHelper {
   }
 
   //? Mengambil Data-Data Hasil Siswa Dari Firebase
-  static Future<List<ResultMdl>> fetchResults(String partName) async {
-    final QuerySnapshot<Map<String, dynamic>> resultsRef =
-        await FirebaseFirestore.instance.collection('results').get();
+  static Future<List<ResultMdl>> fetchResults(
+    String partName, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    Query<Map<String, dynamic>> query =
+        FirebaseFirestore.instance.collection('results');
+
+    if (startDate != null) {
+      query = query.where('createdAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate));
+    }
+
+    if (endDate != null) {
+      query = query.where('createdAt',
+          isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+    }
+
+    final QuerySnapshot<Map<String, dynamic>> resultsRef = await query.get();
 
     final List<ResultMdl> filteredResults = resultsRef.docs
         .map((doc) => ResultMdl.fromMap(doc.data(), doc.id))

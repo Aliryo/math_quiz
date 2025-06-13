@@ -8,10 +8,12 @@ class MyEmpty extends StatelessWidget {
   const MyEmpty({
     super.key,
     required this.title,
+    this.child,
     this.isBackFromQuizPage = false,
   });
   final String title;
   final bool isBackFromQuizPage;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +49,18 @@ class MyEmpty extends StatelessWidget {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-        child: MySelectionButton(
-          title: 'Kembali',
-          onTap: () => isBackFromQuizPage
-              ? Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const WelcomePage(),
-                  ),
-                  (_) => false,
-                )
-              : Navigator.of(context).pop(),
-        ),
+        child: child ??
+            MySelectionButton(
+              title: 'Kembali',
+              onTap: () => isBackFromQuizPage
+                  ? Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const WelcomePage(),
+                      ),
+                      (_) => false,
+                    )
+                  : Navigator.of(context).pop(),
+            ),
       ),
     );
   }

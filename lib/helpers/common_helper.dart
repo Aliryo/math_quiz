@@ -58,4 +58,21 @@ class CommonHelper {
 
     return file.path;
   }
+
+  //? Mengubah DateTime Menjadi String Dengan Format 00-00-0000 00:00:00
+  static String? formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return null;
+
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+
+    String day = twoDigits(dateTime.day);
+    String month = twoDigits(dateTime.month);
+    String year = dateTime.year.toString();
+
+    String hour = twoDigits(dateTime.hour);
+    String minute = twoDigits(dateTime.minute);
+    String second = twoDigits(dateTime.second);
+
+    return '$day-$month-$year $hour:$minute:$second';
+  }
 }

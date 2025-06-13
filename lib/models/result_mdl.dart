@@ -1,11 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ResultMdl {
   final String id;
   final String name;
+  final DateTime? createdAt;
   final List<ScoreData> scoreData;
 
   ResultMdl({
     this.id = '',
     this.name = '',
+    this.createdAt,
     this.scoreData = const [],
   });
 
@@ -13,6 +17,7 @@ class ResultMdl {
     return {
       'id': id,
       'name': name,
+      'createdAt': createdAt,
       'scoreData': scoreData.map((item) => item.toMap()).toList(),
     };
   }
@@ -27,6 +32,9 @@ class ResultMdl {
     return ResultMdl(
       id: id,
       name: data['name'] as String,
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : null,
       scoreData: scoreData,
     );
   }

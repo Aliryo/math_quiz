@@ -134,6 +134,7 @@ class _QuizPageState extends State<QuizPage> {
 
     final result = ResultMdl(
       name: widget.kidName,
+      createdAt: DateTime.now(),
       scoreData: [scoreData],
     );
 
